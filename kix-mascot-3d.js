@@ -5,7 +5,6 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   if (!button || button.dataset.kix3dReady) return;
   button.dataset.kix3dReady = '1';
   const oldImage = button.querySelector('img');
-  if (oldImage) oldImage.remove();
   const canvas = document.createElement('canvas');
   canvas.id = 'kixMascotCanvas';
   canvas.setAttribute('aria-label', 'روبوت KIX ثلاثي الأبعاد');
@@ -14,7 +13,16 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
   camera.position.set(0, 1.05, 10.2);
-  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  } catch (error) {
+    console.warn('KIX 3D mascot unavailable; keeping original mascot image.', error);
+    canvas.remove();
+    button.dataset.kix3dReady = '';
+    return;
+  }
+  if (oldImage) oldImage.remove();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
