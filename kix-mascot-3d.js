@@ -12,7 +12,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-  camera.position.set(0, 1.05, 10.2);
+  camera.position.set(0, 0, 13.5);
+  camera.lookAt(0, -0.15, 0);
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
@@ -22,7 +23,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     button.dataset.kix3dReady = '';
     return;
   }
-  if (oldImage) oldImage.remove();
+  // Keep the original mascot underneath as a permanent visual fallback.
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
