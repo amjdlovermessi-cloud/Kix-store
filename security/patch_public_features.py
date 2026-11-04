@@ -16,8 +16,4 @@ owner=site/'owner.html'; html=owner.read_text(encoding='utf-8')
 if 'kix-admin-reviews.js' not in html:
     html=html.replace('<script src="admin.js" defer></script>','<script src="admin.js" defer></script><link rel="stylesheet" href="kix-public-features.css"><script src="kix-admin-reviews.js" defer></script>',1)
 owner.write_text(html,encoding='utf-8')
-index=site/'index.html'; html=index.read_text(encoding='utf-8')
-if 'kix-mascot-3d.js' not in html:
-    html=html.replace('</head>','<link rel="stylesheet" href="kix-mascot-3d.css"><script type="module" src="kix-mascot-3d.js"></script></head>',1)
-index.write_text(html,encoding='utf-8')
 print('Public statistics and review UI patched.')
