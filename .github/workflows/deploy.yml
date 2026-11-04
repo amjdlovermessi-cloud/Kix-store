@@ -1,0 +1,40 @@
+name: Deploy Kix Store to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check project archive
+        id: archive
+        run: |
+          if [ -f Kix-Store-Ready-to-Upload.zip ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Upload Kix-Store-Ready-to-Upload.zip to the repository root to enable deployment."
+          fi
+      - uses: actions/configure-pages@v5
+        if: steps.archive.outputs.exists == 'true'
+      - name: Extract website
+        if: steps.archive.outputs.exists == 'true'
+        run: |
+          mkdir site
+          unzip -q Kix-Store-Ready-to-Upload.zip -d site
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.archive.outputs.exists == 'true'
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
+        if: steps.archive.outputs.exists == 'true'
