@@ -6,8 +6,6 @@ for name in ('kix-public-features.js','kix-public-features.css','kix-admin-revie
     if not src.exists(): raise SystemExit(f'Missing {src}')
     (site/name).write_bytes(src.read_bytes())
 index=site/'index.html'; html=index.read_text(encoding='utf-8')
-if 'kix-mascot-3d.css' not in html:
-    html=html.replace('</head>','<link rel="stylesheet" href="kix-mascot-3d.css"><script type="module" src="kix-mascot-3d.js"></script></head>',1)
 if 'kix-public-features.css' not in html:
     html=html.replace('</head>','<link rel="stylesheet" href="kix-public-features.css"><script src="kix-public-features.js" defer></script></head>',1)
 if 'id="kixPublicStats"' not in html:
