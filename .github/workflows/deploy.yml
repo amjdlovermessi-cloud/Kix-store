@@ -44,6 +44,19 @@ jobs:
             telegram: 'WARBOY7'
           };
           EOF
+          ADMIN_FILE="$(find site -type f -name admin.js -print -quit)"
+          if [ -n "$ADMIN_FILE" ]; then
+            python3 - "$ADMIN_FILE" <<'PY'
+          import pathlib, sys
+          p = pathlib.Path(sys.argv[1])
+          s = p.read_text()
+          old = "if(error||!['owner','manager'].includes(profile?.role)){await sb.auth.signOut();showError('هذا الحساب ليس لديه صلاحية إدارة.');return;}"
+          new = "if(error||!['owner','manager'].includes(profile?.role)){console.error('KIX_ADMIN_PROFILE_CHECK',{userId:user?.id,error:error?{message:error.message,code:error.code,details:error.details,hint:error.hint}:null,profile});showError('تشخيص مؤقت: '+(error?.message||error?.code||'لا يوجد خطأ')+' | UID: '+(user?.id||'غير متاح')+' | role: '+(profile?.role||'غير موجود'));await sb.auth.signOut();return;}"
+          if old not in s:
+              raise SystemExit("Could not find expected admin profile check")
+          p.write_text(s.replace(old, new, 1))
+          PY
+          fi
       - uses: actions/upload-pages-artifact@v3
         if: steps.archive.outputs.exists == 'true'
         with:
