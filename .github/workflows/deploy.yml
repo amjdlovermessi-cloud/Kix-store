@@ -31,6 +31,19 @@ jobs:
         run: |
           mkdir site
           unzip -q Kix-Store-Ready-to-Upload.zip -d site
+          CONFIG_FILE="$(find site -type f -name config.js -print -quit)"
+          if [ -z "$CONFIG_FILE" ]; then
+            CONFIG_FILE="site/config.js"
+          fi
+          cat > "$CONFIG_FILE" <<'EOF'
+          window.KIX_CONFIG = {
+            supabaseUrl: 'https://xtewgkfwivdonaaozbkc.supabase.co',
+            supabaseAnonKey: 'sb_publishable_auPgBHC9OjfYI8tMCkG0Jg_lJ0Uvh82',
+            currency: 'IQD',
+            whatsapp: '9647751689317',
+            telegram: 'WARBOY7'
+          };
+          EOF
       - uses: actions/upload-pages-artifact@v3
         if: steps.archive.outputs.exists == 'true'
         with:
