@@ -32,7 +32,7 @@ jobs:
           mkdir site
           unzip -q Kix-Store-Ready-to-Upload.zip -d site
           python security/patch_checkout.py site
-          # Inject public store stats, review form, and admin moderation assets.\n          python security/patch_public_features.py site
+          python security/patch_public_features.py site
           CONFIG_FILE="$(find site -type f -name config.js -print -quit)"
           if [ -z "$CONFIG_FILE" ]; then
             CONFIG_FILE="site/config.js"
