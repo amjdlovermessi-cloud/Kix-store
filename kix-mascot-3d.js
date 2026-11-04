@@ -5,6 +5,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   if (!button || button.dataset.kix3dReady) return;
   button.dataset.kix3dReady = '1';
   const oldImage = button.querySelector('img');
+  if (oldImage) { oldImage.style.opacity = '1'; oldImage.style.visibility = 'visible'; }
+  let firstFrameRendered = false;
   const canvas = document.createElement('canvas');
   canvas.id = 'kixMascotCanvas';
   canvas.setAttribute('aria-label', 'روبوت KIX ثلاثي الأبعاد');
@@ -24,7 +26,12 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     return;
   }
   // Keep the original mascot underneath as a permanent visual fallback.
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  canvas.style.position = 'absolute';
+  canvas.style.inset = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.zIndex = '2';
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
@@ -121,6 +128,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
   }
   new ResizeObserver(resize).observe(button); resize();
+  canvas.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault();
+    if (oldImage) { oldImage.style.opacity = '1'; oldImage.style.visibility = 'visible'; }
+  });
   function animate(now){
     requestAnimationFrame(animate);
     const t=now*.001;
