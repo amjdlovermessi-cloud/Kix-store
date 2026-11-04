@@ -95,16 +95,27 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     sphere(head,gold,[x,1.25+h*.84,.02],[.09,.09,.09]);
     mesh(head,red,new THREE.OctahedronGeometry(.105),[x,1.38,.12],[1,1, .35]);
   }
-  // arms, pivot at shoulders, right arm waves
+  // Articulated arms: shoulder, elbow, wrist and fingers
   const arms=[];
   for(const side of [-1,1]){
-    const arm=new THREE.Group(); arm.position.set(side*.83,-.42,0); torso.add(arm); arms.push(arm);
-    sphere(arm,dark,[0,-.28,0],[.29,.38,.3]);
-    cylinder(arm,black,[0,-.66,0],.22,.25,.62,[0,0,side*-.12]);
-    sphere(arm,red,[0,-.48,.18],[.24,.12,.08]);
-    sphere(arm,black,[0,-1.02,.04],[.29,.3,.28]);
-    for(let f=0;f<4;f++) sphere(arm,dark,[(f-1.5)*.12,-1.2,.12],[.09,.18,.1]);
-    sphere(arm,dark,[0,-1.02,.29],[.1,.2,.09]);
+    const shoulder=new THREE.Group(); shoulder.position.set(side*.83,-.42,0); torso.add(shoulder);
+    sphere(shoulder,dark,[0,-.18,0],[.31,.32,.31]);
+    cylinder(shoulder,black,[0,-.52,0],.22,.25,.62,[0,0,side*-.08]);
+    sphere(shoulder,red,[0,-.5,.18],[.24,.12,.08]);
+    const elbow=new THREE.Group(); elbow.position.set(0,-.83,0); shoulder.add(elbow);
+    sphere(elbow,dark,[0,0,0],[.25,.25,.25]);
+    cylinder(elbow,black,[0,-.32,0],.18,.21,.55);
+    const wrist=new THREE.Group(); wrist.position.set(0,-.61,.02); elbow.add(wrist);
+    sphere(wrist,dark,[0,0,0],[.19,.16,.19]);
+    sphere(wrist,black,[0,-.19,.04],[.27,.29,.25]);
+    for(let f=0;f<4;f++){
+      const finger=new THREE.Group(); finger.position.set((f-1.5)*.115,-.34,.06); wrist.add(finger);
+      cylinder(finger,dark,[0,-.09,0],.055,.065,.19);
+      sphere(finger,dark,[0,-.18,0],[.065,.07,.065]);
+    }
+    const thumb=new THREE.Group(); thumb.position.set(side*.22,-.2,.08); wrist.add(thumb);
+    cylinder(thumb,dark,[0,-.09,0],.065,.075,.18,[0,0,side*.55]);
+    arms.push({shoulder,elbow,wrist,side});
   }
   // legs and chunky KIX sneakers
   for(const side of [-1,1]){
@@ -121,8 +132,16 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   const floor=mesh(robot,new THREE.CircleGeometry(1.1,48),new THREE.MeshBasicMaterial({color:0x310713,transparent:true,opacity:.22}),[0,-3.02,0]);
   floor.rotation.x=-Math.PI/2;
 
-  let flipStart=0, waving=true, last=0;
-  button.addEventListener('click',()=>{ if(!flipStart) flipStart=performance.now(); });
+  let flipStart=0;
+  const greeting=document.createElement('div');
+  greeting.className='kix-mascot-greeting';
+  greeting.textContent='هلا بيك في KIX! 👋';
+  button.appendChild(greeting);
+  const flipHint=document.createElement('div');
+  flipHint.className='kix-mascot-flip-hint';
+  flipHint.textContent='اضغط عليّ حتى أسوي شقلبة!';
+  button.appendChild(flipHint);
+  button.addEventListener('click',()=>{ if(!flipStart){ flipStart=performance.now(); greeting.textContent='يلااا شقلبة! 🤸'; } });
   function resize(){
     const w=Math.max(1,button.clientWidth), h=Math.max(1,button.clientHeight);
     renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
@@ -137,14 +156,18 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     const t=now*.001;
     robot.position.y=.12+Math.sin(t*1.5)*.07;
     robot.rotation.y=Math.sin(t*.55)*.13;
-    arms[1].rotation.z=-.15+Math.sin(t*5.2)*.24;
-    arms[0].rotation.z=-.2 + Math.sin(t*5.5)*.55;
+    const wave=Math.sin(t*8.5);
+    arms[1].shoulder.rotation.z=-2.05 + wave*.12;
+    arms[1].elbow.rotation.z=-.22 + wave*.42;
+    arms[1].wrist.rotation.z=wave*.32;
+    arms[0].shoulder.rotation.z=.12 + Math.sin(t*1.8)*.035;
+    arms[0].elbow.rotation.z=.08;
     if(flipStart){
       const p=Math.min(1,(now-flipStart)/1250);
       robot.rotation.x=p*Math.PI*2;
       robot.rotation.z=Math.sin(p*Math.PI)*.12;
       robot.position.y=.12+Math.sin(p*Math.PI)*1.1;
-      if(p>=1){flipStart=0;robot.rotation.set(0,0,0);}
+      if(p>=1){flipStart=0;robot.rotation.set(0,0,0);greeting.textContent='هلا بيك في KIX! 👋';}
     }
     renderer.render(scene,camera);
     if (!firstFrameRendered) {
