@@ -13,7 +13,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-  camera.position.set(0, 1.25, 8.7);
+  camera.position.set(0, 1.05, 10.2);
   const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -121,8 +121,8 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
     arms[0].rotation.z=-.2 + Math.sin(t*5.5)*.55;
     if(flipStart){
       const p=Math.min(1,(now-flipStart)/1250);
-      robot.rotation.x=Math.sin(p*Math.PI*2)*.08;
-      robot.rotation.z=p*Math.PI*2;
+      robot.rotation.x=p*Math.PI*2;
+      robot.rotation.z=Math.sin(p*Math.PI)*.12;
       robot.position.y=.12+Math.sin(p*Math.PI)*1.1;
       if(p>=1){flipStart=0;robot.rotation.set(0,0,0);}
     }
