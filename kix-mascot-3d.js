@@ -147,6 +147,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       if(p>=1){flipStart=0;robot.rotation.set(0,0,0);}
     }
     renderer.render(scene,camera);
+    if (!firstFrameRendered) {
+      firstFrameRendered = true;
+      if (oldImage) { oldImage.style.opacity = '0'; oldImage.style.visibility = 'hidden'; }
+    }
   }
   requestAnimationFrame(animate);
 })();
