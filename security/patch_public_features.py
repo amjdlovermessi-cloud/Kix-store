@@ -49,6 +49,15 @@ for candidate in site.rglob('*'):
         cleaned=cleaned.replace('👋 أضغط على KIX','').replace('👋 اضغط على KIX','')
         if cleaned!=content:
             candidate.write_text(cleaned,encoding='utf-8')
+# Patch the mascot's own dynamically-created labels without removing its button/image/canvas.
+mascot_script=site/'kix-mascot-3d.js'
+if mascot_script.exists():
+    mascot_js=mascot_script.read_text(encoding='utf-8')
+    mascot_js=mascot_js.replace("greeting.textContent='هلا بيك في KIX! 👋';","greeting.textContent='هلا بيك في KIX!';")
+    mascot_js=mascot_js.replace("greeting.textContent='هلا بيك في KIX! 👋';","greeting.textContent='هلا بيك في KIX!';")
+    mascot_js=mascot_js.replace("greeting.textContent='هلا بيك في KIX! 👋';","greeting.textContent='هلا بيك في KIX!';")
+    mascot_js=mascot_js.replace("flipHint.textContent='اضغط عليّ حتى أسوي شقلبة!';","flipHint.textContent=''; flipHint.style.display='none';")
+    mascot_script.write_text(mascot_js,encoding='utf-8')
 owner=site/'owner.html'; html=owner.read_text(encoding='utf-8')
 if 'kix-admin-reviews.js' not in html:
     html=html.replace('<script src="admin.js" defer></script>','<script src="admin.js" defer></script><link rel="stylesheet" href="kix-public-features.css"><script src="kix-admin-reviews.js" defer></script>',1)
