@@ -50,7 +50,8 @@ for candidate in site.rglob('*'):
         cleaned=cleaned.replace('👋 أضغط على KIX','').replace('👋 اضغط على KIX','')
         if cleaned!=content:
             candidate.write_text(cleaned,encoding='utf-8')
-# Patch the mascot wherever its code lives in the extracted ZIP.
+# Remove only the mascot's greeting and flip-hint overlays from the deployed archive.
+# Keep the mascot button, 3D canvas, animation loop, and flip click behavior intact.
 mascot_targets=0
 for candidate in site.rglob('*'):
     if not candidate.is_file() or candidate.suffix.lower() not in ('.html','.js','.css'):
@@ -60,16 +61,26 @@ for candidate in site.rglob('*'):
     except UnicodeDecodeError:
         continue
     updated=content
-    if candidate.suffix.lower() in ('.html','.js') and any(token in content for token in ('kix-mascot-greeting','kix-mascot-flip-hint','هلا بيك في KIX','flipHint.textContent')):
-        updated=re.sub(r"greeting\\.textContent\\s*=\\s*(['\"]).*?\\1;", "greeting.textContent='هلا بيك في KIX!';", updated)
-        updated=re.sub(r"flipHint\\.textContent\\s*=\\s*(['\"]).*?\\1;", "flipHint.textContent=''; flipHint.style.display='none';", updated)
-        mascot_targets+=1
-    if candidate.suffix.lower()=='.css' and '.kix-mascot-flip-hint' in content and '.kix-mascot-flip-hint{display:none!important}' not in content:
-        updated+='\\n.kix-mascot-flip-hint{display:none!important}\\n'
-        mascot_targets+=1
+    if candidate.suffix.lower() in ('.html','.js'):
+        updated,n=re.subn(
+            r"\\n\\s*const greeting\\s*=\\s*document\\.createElement\\('div'\\);.*?button\\.addEventListener\\('click',\\(\\)=>\\{\\s*if\\(!flipStart\\).*?\\}\\);\\s*",
+            "\\n  // Greeting and flip-hint overlays removed; mascot flip interaction is preserved.\\n",
+            updated, count=1, flags=re.S
+        )
+        if n:
+            mascot_targets+=1
+        updated=re.sub(r"greeting\\.textContent\\s*=\\s*(['\"]).*?\\1;", "", updated)
+    if candidate.suffix.lower()=='.css':
+        updated,n=re.subn(
+            r"\\n\\.kix-mascot-greeting,\\.kix-mascot-flip-hint\\{.*?@keyframes kixGreetingPulse[^\\n]*\\n?",
+            "\\n",
+            updated, count=1, flags=re.S
+        )
+        if n:
+            mascot_targets+=1
     if updated!=content:
         candidate.write_text(updated,encoding='utf-8')
-print(f'Mascot labels patched in {mascot_targets} matching asset(s).')
+print(f'Mascot greeting/hint overlays removed in {mascot_targets} matching asset(s).')
 
 owner=site/'owner.html'; html=owner.read_text(encoding='utf-8')
 if 'kix-admin-reviews.js' not in html:
