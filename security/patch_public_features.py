@@ -33,6 +33,7 @@ store.write_text(store_js,encoding='utf-8')
 index.write_text(html,encoding='utf-8')
 # Remove only the obsolete hint text. Never remove its parent HTML element:
 # broad parent-tag matching can accidentally delete the mascot or product categories.
+mascot_decor_removed=0
 for candidate in site.rglob('*'):
     if candidate.is_file() and candidate.suffix.lower() in ('.html','.js','.css'):
         try:
@@ -49,9 +50,13 @@ for candidate in site.rglob('*'):
             cleaned=cleaned.replace(phrase,'')
         # Remove only the two exact decorative siblings beside the mascot button.
         # Keep the mascot button/image, hero-stage, orbit elements, and all store sections.
-        cleaned=cleaned.replace('<span class="mascot-wave" aria-hidden="true">👋</span>','')
-        cleaned=cleaned.replace('<div class="mascot-hint">اضغط على Kix وخليه يسويلك حركة! ✨</div>','')
-        cleaned=cleaned.replace('<div class="mascot-hint">اضغط على Kix وخليه يسويلك حركة!</div>','')
+        for obsolete in (
+            '<span class="mascot-wave" aria-hidden="true">👋</span>',
+            '<div class="mascot-hint">اضغط على Kix وخليه يسويلك حركة! ✨</div>',
+            '<div class="mascot-hint">اضغط على Kix وخليه يسويلك حركة!</div>',
+        ):
+            mascot_decor_removed += cleaned.count(obsolete)
+            cleaned=cleaned.replace(obsolete,'')
         cleaned=cleaned.replace('👋 أضغط على KIX','').replace('👋 اضغط على KIX','')
         if cleaned!=content:
             candidate.write_text(cleaned,encoding='utf-8')
@@ -102,7 +107,11 @@ for candidate in site.rglob('*'):
             mascot_targets+=1
     if updated!=content:
         candidate.write_text(updated,encoding='utf-8')
+print(f'Mascot decorative hand/hint elements removed: {mascot_decor_removed}.')
 print(f'Mascot greeting/hint overlays removed in {mascot_targets} matching asset(s).')
+for page in (site/'index.html',):
+    final_html=page.read_text(encoding='utf-8')
+    print(f'Mascot hint verification: hand_present={\'mascot-wave\' in final_html}; hint_present={\'mascot-hint\' in final_html}; mascot_button_present={\'id="mascotButton"\' in final_html}; categories_present={\'id="categories"\' in final_html}.')
 
 owner=site/'owner.html'; html=owner.read_text(encoding='utf-8')
 if 'kix-admin-reviews.js' not in html:
