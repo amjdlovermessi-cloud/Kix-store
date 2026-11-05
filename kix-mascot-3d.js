@@ -133,15 +133,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   floor.rotation.x=-Math.PI/2;
 
   let flipStart=0;
-  const greeting=document.createElement('div');
-  greeting.className='kix-mascot-greeting';
-  greeting.textContent='هلا بيك في KIX! 👋';
-  button.appendChild(greeting);
-  const flipHint=document.createElement('div');
-  flipHint.className='kix-mascot-flip-hint';
-  flipHint.textContent='اضغط عليّ حتى أسوي شقلبة!';
-  button.appendChild(flipHint);
-  button.addEventListener('click',()=>{ if(!flipStart){ flipStart=performance.now(); greeting.textContent='يلااا شقلبة! 🤸'; } });
+  // Greeting and flip-hint overlays removed; mascot interaction remains.
   function resize(){
     const w=Math.max(1,button.clientWidth), h=Math.max(1,button.clientHeight);
     renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
@@ -167,7 +159,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
       robot.rotation.x=p*Math.PI*2;
       robot.rotation.z=Math.sin(p*Math.PI)*.12;
       robot.position.y=.12+Math.sin(p*Math.PI)*1.1;
-      if(p>=1){flipStart=0;robot.rotation.set(0,0,0);greeting.textContent='هلا بيك في KIX! 👋';}
+      if(p>=1){flipStart=0;robot.rotation.set(0,0,0);}
     }
     renderer.render(scene,camera);
     if (!firstFrameRendered) {
