@@ -150,7 +150,7 @@ if(productGrid){
   };
   productGrid.addEventListener('click',e=>openProduct(e.target));
   productGrid.addEventListener('keydown',e=>{
-    if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-product-id]')){
+    if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-product-id]')&&!e.target.closest('[data-add]')){
       e.preventDefault();openProduct(e.target);
     }
   });
@@ -161,3 +161,5 @@ if 'product-detail.html?id=' not in store_js:
     if marker not in store_js: raise SystemExit('Store init insertion point not found.')
     store_js=store_js.replace(marker,marker+listener,1)
 store.write_text(store_js,encoding='utf-8')
+
+print('Product detail pages installed.')
