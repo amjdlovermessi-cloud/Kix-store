@@ -50,22 +50,26 @@ for candidate in site.rglob('*'):
         cleaned=cleaned.replace('👋 أضغط على KIX','').replace('👋 اضغط على KIX','')
         if cleaned!=content:
             candidate.write_text(cleaned,encoding='utf-8')
-# Patch every copy of the mascot script, wherever the ZIP stores it.
-mascot_scripts=list(site.rglob('kix-mascot-3d.js'))
-if not mascot_scripts:
-    raise SystemExit('Mascot patch failed: kix-mascot-3d.js was not found in extracted site')
-for mascot_script in mascot_scripts:
-    mascot_js=mascot_script.read_text(encoding='utf-8')
-    # Replace every greeting state, including the post-flip reset, with text without the hand emoji.
-    mascot_js=re.sub(r"greeting\\.textContent\\s*=\\s*(['\"]).*?\\1;", "greeting.textContent='هلا بيك في KIX!';", mascot_js)
-    # Keep the mascot and its click animation, but remove the explanatory hint bubble.
-    mascot_js=re.sub(r"flipHint\\.textContent\\s*=\\s*(['\"]).*?\\1;", "flipHint.textContent=''; flipHint.style.display='none';", mascot_js)
-    mascot_script.write_text(mascot_js,encoding='utf-8')
-# CSS fallback: hide the hint even if a cached or alternate mascot script is loaded.
-for mascot_css in site.rglob('kix-mascot-3d.css'):
-    css=mascot_css.read_text(encoding='utf-8')
-    if '.kix-mascot-flip-hint{display:none!important}' not in css:
-        mascot_css.write_text(css+'\\n.kix-mascot-flip-hint{display:none!important}\\n',encoding='utf-8')
+# Patch the mascot wherever its code lives in the extracted ZIP.
+mascot_targets=0
+for candidate in site.rglob('*'):
+    if not candidate.is_file() or candidate.suffix.lower() not in ('.html','.js','.css'):
+        continue
+    try:
+        content=candidate.read_text(encoding='utf-8')
+    except UnicodeDecodeError:
+        continue
+    updated=content
+    if candidate.suffix.lower() in ('.html','.js') and any(token in content for token in ('kix-mascot-greeting','kix-mascot-flip-hint','هلا بيك في KIX','flipHint.textContent')):
+        updated=re.sub(r"greeting\\.textContent\\s*=\\s*(['\"]).*?\\1;", "greeting.textContent='هلا بيك في KIX!';", updated)
+        updated=re.sub(r"flipHint\\.textContent\\s*=\\s*(['\"]).*?\\1;", "flipHint.textContent=''; flipHint.style.display='none';", updated)
+        mascot_targets+=1
+    if candidate.suffix.lower()=='.css' and '.kix-mascot-flip-hint' in content and '.kix-mascot-flip-hint{display:none!important}' not in content:
+        updated+='\\n.kix-mascot-flip-hint{display:none!important}\\n'
+        mascot_targets+=1
+    if updated!=content:
+        candidate.write_text(updated,encoding='utf-8')
+print(f'Mascot labels patched in {mascot_targets} matching asset(s).')
 
 owner=site/'owner.html'; html=owner.read_text(encoding='utf-8')
 if 'kix-admin-reviews.js' not in html:
