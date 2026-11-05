@@ -57,9 +57,18 @@ for candidate in site.rglob('*'):
     if candidate.is_file() and candidate.suffix.lower() in ('.html','.js','.css'):
         try: diagnostic_text=candidate.read_text(encoding='utf-8')
         except UnicodeDecodeError: continue
-        if any(token in diagnostic_text.lower() for token in ('greeting','fliphint','kix-mascot','اضغط','أضغط')):
-            hits=[line.strip()[:220] for line in diagnostic_text.splitlines() if any(token in line.lower() for token in ('greeting','fliphint','kix-mascot','اضغط','أضغط'))]
-            print(f'MASCOT_SOURCE {candidate}: ' + ' || '.join(hits[:12]))
+        tokens=('greeting','fliphint','kix-mascot','اضغط','أضغط','حتى يسويلك حركة','حتى يسوي لك حركة')
+        if any(token in diagnostic_text.lower() for token in tokens):
+            snippets=[]
+            low=diagnostic_text.lower()
+            for token in tokens:
+                pos=0
+                while True:
+                    pos=low.find(token,pos)
+                    if pos<0: break
+                    snippets.append(f'{token} => {diagnostic_text[max(0,pos-500):min(len(diagnostic_text),pos+900)]}')
+                    pos+=len(token)
+            print(f'MASCOT_SOURCE {candidate}: ' + ' || '.join(snippets[:20]))
 mascot_targets=0
 for candidate in site.rglob('*'):
     if not candidate.is_file() or candidate.suffix.lower() not in ('.html','.js','.css'):
