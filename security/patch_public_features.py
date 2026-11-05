@@ -127,3 +127,37 @@ mobile_nav_source = root / "security" / "patch_mobile_nav.py"
 if mobile_nav_source.exists():
     import subprocess
     subprocess.run([sys.executable, str(mobile_nav_source), str(site)], check=True)
+
+# Product detail pages and recommendation cards.
+for name in ('product-detail.html','kix-product-detail.js','kix-product-detail.css'):
+    src=root/name
+    if not src.exists(): raise SystemExit(f'Missing {src}')
+    (site/name).write_bytes(src.read_bytes())
+store=site/'store.js'; store_js=store.read_text(encoding='utf-8')
+old_card='<article class="product-card">'
+new_card='<article class="product-card" data-product-id="${esc(p.id)}" role="link" tabindex="0">'
+if 'data-product-id="${esc(p.id)}"' not in store_js:
+    if store_js.count(old_card) < 2:
+        raise SystemExit('Product card template not found twice; refusing unsafe patch.')
+    store_js=store_js.replace(old_card,new_card)
+listener="""
+const productGrid=$('#productGrid');
+if(productGrid){
+  const openProduct=el=>{
+    const card=el.closest('[data-product-id]');
+    if(!card||el.closest('[data-add]')) return;
+    location.href='product-detail.html?id='+encodeURIComponent(card.dataset.productId);
+  };
+  productGrid.addEventListener('click',e=>openProduct(e.target));
+  productGrid.addEventListener('keydown',e=>{
+    if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-product-id]')){
+      e.preventDefault();openProduct(e.target);
+    }
+  });
+}
+"""
+if 'product-detail.html?id=' not in store_js:
+    marker="function init(){ $('#year').textContent=new Date().getFullYear();"
+    if marker not in store_js: raise SystemExit('Store init insertion point not found.')
+    store_js=store_js.replace(marker,marker+listener,1)
+store.write_text(store_js,encoding='utf-8')
