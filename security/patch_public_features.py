@@ -121,3 +121,9 @@ if 'kix-admin-reviews.js' not in html:
     html=html.replace('<script src="admin.js" defer></script>','<script src="admin.js" defer></script><link rel="stylesheet" href="kix-public-features.css"><script src="kix-admin-reviews.js" defer></script>',1)
 owner.write_text(html,encoding='utf-8')
 print('Public statistics and review UI patched.')
+
+# Install the mobile navigation close-on-selection behavior.
+mobile_nav_source = root / "security" / "patch_mobile_nav.py"
+if mobile_nav_source.exists():
+    import subprocess
+    subprocess.run([sys.executable, str(mobile_nav_source), str(site)], check=True)
