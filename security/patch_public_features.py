@@ -18,10 +18,31 @@ old_money="""const $=s=>document.querySelector(s), money=n=>new Intl.NumberForma
 new_money="""const $=s=>document.querySelector(s), money=n=>{const amount=Number(n||0);return localStorage.getItem('kix-display-currency')==='USD'?'$'+(amount/1520).toFixed(2):new Intl.NumberFormat('ar-IQ').format(amount)+' د.ع'};"""
 if old_money in store_js and 'kix-display-currency' not in store_js:
     store_js=store_js.replace(old_money,new_money,1)
+elif 'kix-display-currency' not in store_js:
+    raise SystemExit('Currency patch failed: original money() formatter was not found in store.js')
 if "kix-currency-changed" not in store_js:
-    store_js=store_js.replace("document.addEventListener('DOMContentLoaded',init);","window.addEventListener('kix-currency-changed',()=>{if($('#productSearch')?.value||$('#categoryFilter')?.value)filterProducts();else renderProducts();renderCart();});\ndocument.addEventListener('DOMContentLoaded',init);",1)
+    marker="document.addEventListener('DOMContentLoaded',init);"
+    listener="window.addEventListener('kix-currency-changed',()=>{if($('#productSearch')?.value||$('#categoryFilter')?.value)filterProducts();else renderProducts();renderCart();});\n"+marker
+    if marker not in store_js:
+        raise SystemExit('Currency patch failed: store initialization marker was not found')
+    store_js=store_js.replace(marker,listener,1)
+if 'kix-display-currency' not in store_js or 'kix-currency-changed' not in store_js:
+    raise SystemExit('Currency patch verification failed: formatter or refresh listener is missing')
 store.write_text(store_js,encoding='utf-8')
 index.write_text(html,encoding='utf-8')
+# Remove the obsolete mascot interaction hint and its waving-hand emoji.
+hint=re.compile(r'<(p|div|span|button)[^>]*>.*?(?:أضغط|اضغط)\s*على\s*KIX.*?يسويلك\s*حركة.*?</\1>',re.I|re.S)
+for candidate in site.rglob('*'):
+    if candidate.is_file() and candidate.suffix.lower() in ('.html','.js','.css'):
+        try:
+            content=candidate.read_text(encoding='utf-8')
+        except UnicodeDecodeError:
+            continue
+        cleaned=hint.sub('',content)
+        cleaned=cleaned.replace('أضغط على KIX حتى يسويلك حركة','').replace('اضغط على KIX حتى يسويلك حركة','')
+        cleaned=cleaned.replace('👋','')
+        if cleaned!=content:
+            candidate.write_text(cleaned,encoding='utf-8')
 owner=site/'owner.html'; html=owner.read_text(encoding='utf-8')
 if 'kix-admin-reviews.js' not in html:
     html=html.replace('<script src="admin.js" defer></script>','<script src="admin.js" defer></script><link rel="stylesheet" href="kix-public-features.css"><script src="kix-admin-reviews.js" defer></script>',1)
