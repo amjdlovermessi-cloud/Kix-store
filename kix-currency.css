@@ -1,0 +1,5 @@
+.kix-currency-wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:7px;padding:8px 12px;position:relative;z-index:20}
+.kix-currency-control{border:1px solid rgba(255,190,55,.7);border-radius:999px;padding:9px 15px;background:#111522;color:#fff;font:700 13px/1.2 inherit;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.kix-currency-control:hover{background:#242b3d;border-color:#ffbd45}
+.kix-currency-note{font-size:10px;color:#9da7bc;direction:rtl;max-width:290px}
+@media(max-width:600px){.kix-currency-wrap{justify-content:center;padding:6px}.kix-currency-note{width:100%;text-align:center;max-width:none}.kix-currency-control{font-size:12px;padding:8px 12px}}
