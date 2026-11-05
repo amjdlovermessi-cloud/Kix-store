@@ -69,7 +69,7 @@ for candidate in site.rglob('*'):
         )
         if n:
             mascot_targets+=1
-        updated=re.sub(r"greeting\.textContent\s*=\s*(['"]).*?\1;", "", updated)
+        updated=re.sub(r"greeting\.textContent\s*=\s*[^;]*;", "", updated)
     if candidate.suffix.lower()=='.css':
         updated,n=re.subn(
             r"\n\.kix-mascot-greeting,\.kix-mascot-flip-hint\{.*?@keyframes kixGreetingPulse[^\n]*\n?",
