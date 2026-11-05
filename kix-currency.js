@@ -98,6 +98,7 @@
       currency = currency === 'IQD' ? 'USD' : 'IQD';
       localStorage.setItem(STORAGE_KEY, currency);
       renderAll();
+      window.dispatchEvent(new Event('kix-currency-changed'));
     });
     const note = document.createElement('span');
     note.className = 'kix-currency-note';
