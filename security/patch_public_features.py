@@ -63,7 +63,7 @@ for candidate in site.rglob('*'):
     updated=content
     if candidate.suffix.lower() in ('.html','.js'):
         updated,n=re.subn(
-            r"\n\s*const greeting\s*=\s*document\.createElement\('div'\);.*?button\.addEventListener\('click',\(\)=>\{\s*if\(!flipStart\).*?\}\);\s*",
+            r"\n\s*const greeting\s*=\s*document\.createElement\('div'\);.*?button\.appendChild\(flipHint\);\s*",
             "\n  // Greeting and flip-hint overlays removed; mascot flip interaction is preserved.\n",
             updated, count=1, flags=re.S
         )
