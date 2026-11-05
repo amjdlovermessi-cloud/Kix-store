@@ -109,9 +109,12 @@ for candidate in site.rglob('*'):
         candidate.write_text(updated,encoding='utf-8')
 print(f'Mascot decorative hand/hint elements removed: {mascot_decor_removed}.')
 print(f'Mascot greeting/hint overlays removed in {mascot_targets} matching asset(s).')
-for page in (site/'index.html',):
-    final_html=page.read_text(encoding='utf-8')
-    print(f'Mascot hint verification: hand_present={\'mascot-wave\' in final_html}; hint_present={\'mascot-hint\' in final_html}; mascot_button_present={\'id="mascotButton"\' in final_html}; categories_present={\'id="categories"\' in final_html}.')
+final_html=(site/'index.html').read_text(encoding='utf-8')
+hand_present='mascot-wave' in final_html
+hint_present='mascot-hint' in final_html
+mascot_button_present='id="mascotButton"' in final_html
+categories_present='id="categories"' in final_html
+print(f'Mascot hint verification: hand_present={hand_present}; hint_present={hint_present}; mascot_button_present={mascot_button_present}; categories_present={categories_present}.')
 
 owner=site/'owner.html'; html=owner.read_text(encoding='utf-8')
 if 'kix-admin-reviews.js' not in html:
