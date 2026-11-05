@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 import sys
 site=Path(sys.argv[1]); root=Path(__file__).resolve().parent.parent
 for name in ('kix-public-features.js','kix-public-features.css','kix-admin-reviews.js','kix-currency.js','kix-currency.css'):
@@ -49,15 +50,23 @@ for candidate in site.rglob('*'):
         cleaned=cleaned.replace('👋 أضغط على KIX','').replace('👋 اضغط على KIX','')
         if cleaned!=content:
             candidate.write_text(cleaned,encoding='utf-8')
-# Patch the mascot's own dynamically-created labels without removing its button/image/canvas.
-mascot_script=site/'kix-mascot-3d.js'
-if mascot_script.exists():
+# Patch every copy of the mascot script, wherever the ZIP stores it.
+mascot_scripts=list(site.rglob('kix-mascot-3d.js'))
+if not mascot_scripts:
+    raise SystemExit('Mascot patch failed: kix-mascot-3d.js was not found in extracted site')
+for mascot_script in mascot_scripts:
     mascot_js=mascot_script.read_text(encoding='utf-8')
-    mascot_js=mascot_js.replace("greeting.textContent='هلا بيك في KIX! 👋';","greeting.textContent='هلا بيك في KIX!';")
-    mascot_js=mascot_js.replace("greeting.textContent='هلا بيك في KIX! 👋';","greeting.textContent='هلا بيك في KIX!';")
-    mascot_js=mascot_js.replace("greeting.textContent='هلا بيك في KIX! 👋';","greeting.textContent='هلا بيك في KIX!';")
-    mascot_js=mascot_js.replace("flipHint.textContent='اضغط عليّ حتى أسوي شقلبة!';","flipHint.textContent=''; flipHint.style.display='none';")
+    # Replace every greeting state, including the post-flip reset, with text without the hand emoji.
+    mascot_js=re.sub(r"greeting\\.textContent\\s*=\\s*(['\"]).*?\\1;", "greeting.textContent='هلا بيك في KIX!';", mascot_js)
+    # Keep the mascot and its click animation, but remove the explanatory hint bubble.
+    mascot_js=re.sub(r"flipHint\\.textContent\\s*=\\s*(['\"]).*?\\1;", "flipHint.textContent=''; flipHint.style.display='none';", mascot_js)
     mascot_script.write_text(mascot_js,encoding='utf-8')
+# CSS fallback: hide the hint even if a cached or alternate mascot script is loaded.
+for mascot_css in site.rglob('kix-mascot-3d.css'):
+    css=mascot_css.read_text(encoding='utf-8')
+    if '.kix-mascot-flip-hint{display:none!important}' not in css:
+        mascot_css.write_text(css+'\\n.kix-mascot-flip-hint{display:none!important}\\n',encoding='utf-8')
+
 owner=site/'owner.html'; html=owner.read_text(encoding='utf-8')
 if 'kix-admin-reviews.js' not in html:
     html=html.replace('<script src="admin.js" defer></script>','<script src="admin.js" defer></script><link rel="stylesheet" href="kix-public-features.css"><script src="kix-admin-reviews.js" defer></script>',1)
