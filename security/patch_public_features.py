@@ -52,6 +52,14 @@ for candidate in site.rglob('*'):
             candidate.write_text(cleaned,encoding='utf-8')
 # Remove only the mascot's greeting and flip-hint overlays from the deployed archive.
 # Keep the mascot button, 3D canvas, animation loop, and flip click behavior intact.
+# Diagnose the actual mascot source inside the deployed ZIP before applying targeted edits.
+for candidate in site.rglob('*'):
+    if candidate.is_file() and candidate.suffix.lower() in ('.html','.js','.css'):
+        try: diagnostic_text=candidate.read_text(encoding='utf-8')
+        except UnicodeDecodeError: continue
+        if any(token in diagnostic_text.lower() for token in ('greeting','fliphint','kix-mascot','اضغط','أضغط')):
+            hits=[line.strip()[:220] for line in diagnostic_text.splitlines() if any(token in line.lower() for token in ('greeting','fliphint','kix-mascot','اضغط','أضغط'))]
+            print(f'MASCOT_SOURCE {candidate}: ' + ' || '.join(hits[:12]))
 mascot_targets=0
 for candidate in site.rglob('*'):
     if not candidate.is_file() or candidate.suffix.lower() not in ('.html','.js','.css'):
