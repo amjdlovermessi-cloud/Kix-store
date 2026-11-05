@@ -133,6 +133,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
   floor.rotation.x=-Math.PI/2;
 
   let flipStart=0;
+  button.addEventListener('click',()=>{ if(!flipStart){ flipStart=performance.now(); } });
   // Greeting and flip-hint overlays removed; mascot interaction remains.
   function resize(){
     const w=Math.max(1,button.clientWidth), h=Math.max(1,button.clientHeight);
