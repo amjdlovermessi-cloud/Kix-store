@@ -4,15 +4,17 @@
   window.__KIX_CURRENCY_READY__ = true;
 
   // Official public-facing rate: 1 USD = 1,520 IQD.
-  // Source: Central Bank of Iraq rate notice, effective 7 Oct 2026.
   const IQD_PER_USD = 1520;
   const STORAGE_KEY = 'kix-display-currency';
   let currency = localStorage.getItem(STORAGE_KEY) === 'USD' ? 'USD' : 'IQD';
   const originals = new WeakMap();
+  const elementOriginals = new WeakMap();
   let updating = false;
 
-  const toLatin = value => value.replace(/[٠-٩۰-۹]/g, ch =>
-    String('٠١٢٣٤٥٦٧٨٩'.indexOf(ch) >= 0 ? '٠١٢٣٤٥٦٧٨٩'.indexOf(ch) : '۰۱۲۳۴۵۶۷۸۹'.indexOf(ch)));
+  const toLatin = value => value.replace(/[٠-٩۰-۹]/g, ch => {
+    const a = '٠١٢٣٤٥٦٧٨٩'.indexOf(ch);
+    return String(a >= 0 ? a : '۰۱۲۳۴۵۶۷۸۹'.indexOf(ch));
+  });
   const parseAmount = value => {
     const normalized = toLatin(value).replace(/[٬،\s]/g, '').replace(/,/g, '');
     const n = Number(normalized);
@@ -22,27 +24,42 @@
   const formatUSD = n => '$' + (n / IQD_PER_USD).toFixed(2);
 
   function convertText(source) {
-    if (!/(د\s*\.\s*ع|ع\.د|دينار|IQD)/i.test(source)) return source;
+    if (!/(د\s*\.\s*ع|ع\s*\.\s*د|دينار|IQD)/i.test(source)) return source;
     let output = source;
-    const after = /(\d[\d٠-٩۰-۹٬،,. ]*)\s*(د\s*\.\s*ع|ع\.د|دينار(?:\s*عراقي)?|IQD)/gi;
+    const after = /(\d[\d٠-٩۰-۹٬،,. ]*)\s*(د\s*\.\s*ع|ع\s*\.\s*د|دينار(?:\s*عراقي)?|IQD)/gi;
     output = output.replace(after, (whole, raw) => {
       const amount = parseAmount(raw);
-      if (amount === null) return whole;
-      return currency === 'USD' ? formatUSD(amount) : formatIQD(amount);
+      return amount === null ? whole : (currency === 'USD' ? formatUSD(amount) : formatIQD(amount));
     });
-    const before = /(IQD|د\s*\.\s*ع|ع\.د)\s*(\d[\d٠-٩۰-۹٬،,. ]*)/gi;
+    const before = /(IQD|د\s*\.\s*ع|ع\s*\.\s*د)\s*(\d[\d٠-٩۰-۹٬،,. ]*)/gi;
     output = output.replace(before, (whole, _symbol, raw) => {
       const amount = parseAmount(raw);
-      if (amount === null) return whole;
-      return currency === 'USD' ? formatUSD(amount) : formatIQD(amount);
+      return amount === null ? whole : (currency === 'USD' ? formatUSD(amount) : formatIQD(amount));
     });
     return output;
   }
 
+  function isStandalonePrice(value) {
+    return /^\s*(?:(?:د\s*\.\s*ع|ع\s*\.\s*د|IQD)\s*[\d٠-٩۰-۹][\d٠-٩۰-۹٬،,. ]*|[\d٠-٩۰-۹][\d٠-٩۰-۹٬،,. ]*\s*(?:د\s*\.\s*ع|ع\s*\.\s*د|دينار(?:\s*عراقي)?|IQD))\s*$/i.test(value);
+  }
+
+  function processPriceElement(element) {
+    if (!element || element.nodeType !== Node.ELEMENT_NODE || updating) return;
+    if (element.closest('script,style,textarea,input,[contenteditable="true"],.kix-currency-control,.kix-currency-wrap')) return;
+    const current = element.textContent || '';
+    if (!isStandalonePrice(current)) return;
+    if (!elementOriginals.has(element)) elementOriginals.set(element, current);
+    const next = convertText(elementOriginals.get(element));
+    if (current !== next) {
+      updating = true;
+      element.textContent = next;
+      updating = false;
+    }
+  }
+
   function processTextNode(node) {
-    if (!node || node.nodeType !== Node.TEXT_NODE || !node.parentElement) return;
-    if (node.parentElement.closest('script,style,textarea,input,[contenteditable="true"],.kix-currency-control')) return;
-    if (updating) return;
+    if (!node || node.nodeType !== Node.TEXT_NODE || !node.parentElement || updating) return;
+    if (node.parentElement.closest('script,style,textarea,input,[contenteditable="true"],.kix-currency-control,.kix-currency-wrap')) return;
     if (!originals.has(node)) originals.set(node, node.nodeValue);
     const next = convertText(originals.get(node));
     if (node.nodeValue !== next) {
@@ -57,6 +74,8 @@
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     let node;
     while ((node = walker.nextNode())) processTextNode(node);
+    if (root.nodeType === Node.ELEMENT_NODE) processPriceElement(root);
+    if (root.querySelectorAll) root.querySelectorAll('*').forEach(processPriceElement);
   }
 
   function renderAll() {
