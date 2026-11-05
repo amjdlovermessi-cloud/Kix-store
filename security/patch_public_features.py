@@ -47,6 +47,11 @@ for candidate in site.rglob('*'):
             'اضغط على KIX حتى يسوي لك حركة',
         ):
             cleaned=cleaned.replace(phrase,'')
+        # Remove only the two exact decorative siblings beside the mascot button.
+        # Keep the mascot button/image, hero-stage, orbit elements, and all store sections.
+        cleaned=cleaned.replace('<span class="mascot-wave" aria-hidden="true">👋</span>','')
+        cleaned=cleaned.replace('<div class="mascot-hint">اضغط على Kix وخليه يسويلك حركة! ✨</div>','')
+        cleaned=cleaned.replace('<div class="mascot-hint">اضغط على Kix وخليه يسويلك حركة!</div>','')
         cleaned=cleaned.replace('👋 أضغط على KIX','').replace('👋 اضغط على KIX','')
         if cleaned!=content:
             candidate.write_text(cleaned,encoding='utf-8')
