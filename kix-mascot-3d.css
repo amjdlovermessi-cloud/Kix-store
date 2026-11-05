@@ -18,21 +18,3 @@
 .hero-stage .mascot-wave{display:none!important}
 @media(max-width:700px){.hero-stage .mascot-button{height:340px;max-width:350px;margin:auto}}
 
-.kix-mascot-greeting,.kix-mascot-flip-hint{
-  position:absolute; left:50%; z-index:4; transform:translateX(-50%);
-  pointer-events:none; white-space:nowrap; direction:rtl; text-align:center;
-  font-family:inherit; font-weight:800; border-radius:999px;
-}
-.kix-mascot-greeting{
-  top:2px; padding:11px 19px; color:#fff;
-  background:linear-gradient(135deg,#ef173d,#8e0925);
-  border:1px solid rgba(255,255,255,.35);
-  box-shadow:0 8px 28px rgba(255,20,60,.35);
-  animation:kixGreetingPulse 2s ease-in-out infinite;
-}
-.kix-mascot-flip-hint{
-  bottom:3px; padding:8px 15px; color:#f5f6ff;
-  background:rgba(12,14,24,.88); border:1px solid rgba(255,181,45,.75);
-  font-size:13px;
-}
-@keyframes kixGreetingPulse{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}
