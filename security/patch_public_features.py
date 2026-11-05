@@ -64,7 +64,7 @@ for candidate in site.rglob('*'):
     if candidate.suffix.lower() in ('.html','.js'):
         updated,n=re.subn(
             r"\n\s*const greeting\s*=\s*document\.createElement\('div'\);.*?button\.appendChild\(flipHint\);\s*",
-            "\n  // Greeting and flip-hint overlays removed; mascot flip interaction is preserved.\n",
+            "\n  // Greeting and flip-hint overlays removed.\n  button.addEventListener('click',()=>{ if(!flipStart){ flipStart=performance.now(); } });\n",
             updated, count=1, flags=re.S
         )
         if n:
