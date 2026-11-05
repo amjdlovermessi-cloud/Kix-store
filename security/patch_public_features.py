@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 import sys
 site=Path(sys.argv[1]); root=Path(__file__).resolve().parent.parent
@@ -31,17 +30,23 @@ if 'kix-display-currency' not in store_js or 'kix-currency-changed' not in store
     raise SystemExit('Currency patch verification failed: formatter or refresh listener is missing')
 store.write_text(store_js,encoding='utf-8')
 index.write_text(html,encoding='utf-8')
-# Remove the obsolete mascot interaction hint and its waving-hand emoji.
-hint=re.compile(r'<(p|div|span|button)[^>]*>.*?(?:أضغط|اضغط)\s*على\s*KIX.*?يسويلك\s*حركة.*?</\1>',re.I|re.S)
+# Remove only the obsolete hint text. Never remove its parent HTML element:
+# broad parent-tag matching can accidentally delete the mascot or product categories.
 for candidate in site.rglob('*'):
     if candidate.is_file() and candidate.suffix.lower() in ('.html','.js','.css'):
         try:
             content=candidate.read_text(encoding='utf-8')
         except UnicodeDecodeError:
             continue
-        cleaned=hint.sub('',content)
-        cleaned=cleaned.replace('أضغط على KIX حتى يسويلك حركة','').replace('اضغط على KIX حتى يسويلك حركة','')
-        cleaned=cleaned.replace('👋','')
+        cleaned=content
+        for phrase in (
+            'أضغط على KIX حتى يسويلك حركة',
+            'اضغط على KIX حتى يسويلك حركة',
+            'أضغط على KIX حتى يسوي لك حركة',
+            'اضغط على KIX حتى يسوي لك حركة',
+        ):
+            cleaned=cleaned.replace(phrase,'')
+        cleaned=cleaned.replace('👋 أضغط على KIX','').replace('👋 اضغط على KIX','')
         if cleaned!=content:
             candidate.write_text(cleaned,encoding='utf-8')
 owner=site/'owner.html'; html=owner.read_text(encoding='utf-8')
