@@ -194,3 +194,14 @@ for candidate in site.rglob('*'):
         candidate.write_text(revised, encoding='utf-8')
         telegram_updated += 1
 print(f'Telegram destinations updated to https://t.me/kixstore1 in {telegram_updated} deployed asset(s).')
+
+
+# Add the new official Telegram contact next to the Instagram footer link.
+index = site/'index.html'
+html = index.read_text(encoding='utf-8')
+if 'id="kixTelegramLink"' not in html:
+    telegram = '''<section class="kix-social-footer" aria-label="حساب KIX STORE على تيليغرام"><a id="kixTelegramLink" href="https://t.me/kixstore1" target="_blank" rel="noopener noreferrer"><span class="kix-telegram-icon" aria-hidden="true">➤</span><span><strong>تواصل ويانا على تيليغرام</strong><small>@kixstore1</small></span><b aria-hidden="true">↗</b></a></section><style>.kix-social-footer{display:flex;justify-content:center;padding:0 16px 24px;background:#08080b}.kix-social-footer a{display:flex;align-items:center;gap:13px;width:min(100%,420px);padding:14px 17px;border:1px solid rgba(45,165,220,.48);border-radius:15px;background:linear-gradient(120deg,#111820,#101015);color:#fff;text-decoration:none}.kix-social-footer .kix-telegram-icon{display:grid;place-items:center;width:31px;height:31px;border-radius:50%;background:#229ed9;color:white;font-size:17px;flex:none}.kix-social-footer a span:nth-child(2){display:grid;gap:3px;flex:1}.kix-social-footer strong{font-size:14px}.kix-social-footer small{font-size:12px;color:#aaa}.kix-social-footer b{color:#229ed9;font-size:20px}</style>'''
+    if '</body>' not in html: raise SystemExit('Telegram footer insertion failed: </body> missing')
+    html = html.replace('</body>', telegram+'\\n</body>', 1)
+    index.write_text(html, encoding='utf-8')
+print('Telegram footer link installed:', 'id="kixTelegramLink"' in (site/'index.html').read_text(encoding='utf-8'))
