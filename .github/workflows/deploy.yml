@@ -43,10 +43,14 @@ jobs:
                   data = path.read_text(encoding="utf-8")
               except (UnicodeDecodeError, OSError):
                   continue
-              updated = data.replace("WARBOY7", "kixstore1").replace("@WARBOY7", "@kixstore1")
+              updated = data.replace("WARBOY7", "kixstore1").replace("warboy7", "kixstore1")
               if updated != data:
                   path.write_text(updated, encoding="utf-8")
           PY
+          if grep -Rni --exclude='*.map' 'WARBOY7\|warboy7' site; then
+            echo "Old Telegram handle remains in deployed files."
+            exit 1
+          fi
           CONFIG_FILE="$(find site -type f -name config.js -print -quit)"
           if [ -z "$CONFIG_FILE" ]; then
             CONFIG_FILE="site/config.js"
