@@ -174,3 +174,23 @@ if 'id="kixInstagramLink"' not in html:
     html=html.replace('</body>',instagram+'\\n</body>',1)
     index.write_text(html,encoding='utf-8')
 print('Instagram footer link installed and verified:', 'id="kixInstagramLink"' in (site/'index.html').read_text(encoding='utf-8'))
+
+
+# Update every storefront Telegram destination to the user's new official account.
+import re
+telegram_updated = 0
+for candidate in site.rglob('*'):
+    if not candidate.is_file() or candidate.suffix.lower() not in ('.html','.js','.css','.json'):
+        continue
+    try:
+        source = candidate.read_text(encoding='utf-8')
+    except UnicodeDecodeError:
+        continue
+    revised = re.sub(r'https?://(?:www\\.)?(?:t\\.me|telegram\\.me)/[^\\s\\"\'<>]+',
+                     'https://t.me/kixstore1', source, flags=re.I)
+    revised = re.sub(r'(?i)(href\\s*=\\s*["\'])(?:https?://)?(?:www\\.)?(?:t\\.me|telegram\\.me)/[^"\']*',
+                     r'\\1https://t.me/kixstore1', revised)
+    if revised != source:
+        candidate.write_text(revised, encoding='utf-8')
+        telegram_updated += 1
+print(f'Telegram destinations updated to https://t.me/kixstore1 in {telegram_updated} deployed asset(s).')
