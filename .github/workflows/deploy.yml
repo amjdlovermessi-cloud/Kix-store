@@ -33,6 +33,20 @@ jobs:
           unzip -q Kix-Store-Ready-to-Upload.zip -d site
           python security/patch_checkout.py site
           python security/patch_public_features.py site
+          python - <<'PY'
+          from pathlib import Path
+          root = Path("site")
+          for path in root.rglob("*"):
+              if not path.is_file():
+                  continue
+              try:
+                  data = path.read_text(encoding="utf-8")
+              except (UnicodeDecodeError, OSError):
+                  continue
+              updated = data.replace("WARBOY7", "kixstore1").replace("@WARBOY7", "@kixstore1")
+              if updated != data:
+                  path.write_text(updated, encoding="utf-8")
+          PY
           CONFIG_FILE="$(find site -type f -name config.js -print -quit)"
           if [ -z "$CONFIG_FILE" ]; then
             CONFIG_FILE="site/config.js"
