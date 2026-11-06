@@ -163,3 +163,14 @@ if 'product-detail.html?id=' not in store_js:
 store.write_text(store_js,encoding='utf-8')
 
 print('Product detail pages installed.')
+
+
+# Add the official KIX Store Instagram link to the storefront footer.
+index=site/'index.html'
+html=index.read_text(encoding='utf-8')
+if 'id="kixInstagramLink"' not in html:
+    instagram='''<section class="kix-instagram-footer" aria-label="حساب KIX STORE على إنستغرام"><a id="kixInstagramLink" href="https://www.instagram.com/kixstore_1/" target="_blank" rel="noopener noreferrer" aria-label="تابع KIX STORE على إنستغرام"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></svg><span><strong>تابع KIX STORE</strong><small>على إنستغرام · @kixstore_1</small></span><b aria-hidden="true">↗</b></a></section><style>.kix-instagram-footer{display:flex;justify-content:center;padding:22px 16px 30px;background:#08080b}.kix-instagram-footer a{display:flex;align-items:center;gap:13px;width:min(100%,420px);padding:14px 17px;border:1px solid rgba(255,55,75,.48);border-radius:15px;background:linear-gradient(120deg,#171116,#101015);color:#fff;text-decoration:none;box-shadow:0 8px 28px #0005}.kix-instagram-footer svg{width:31px;height:31px;color:#ff5267;flex:none}.kix-instagram-footer span{display:grid;gap:3px;flex:1}.kix-instagram-footer strong{font-size:14px}.kix-instagram-footer small{font-size:12px;color:#aaa}.kix-instagram-footer b{color:#ff5267;font-size:20px}</style>'''
+    if '</body>' not in html: raise SystemExit('Instagram patch failed: </body> not found in index.html')
+    html=html.replace('</body>',instagram+'\\n</body>',1)
+    index.write_text(html,encoding='utf-8')
+print('Instagram footer link installed and verified:', 'id="kixInstagramLink"' in (site/'index.html').read_text(encoding='utf-8'))
