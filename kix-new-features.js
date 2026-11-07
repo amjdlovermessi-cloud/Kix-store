@@ -29,19 +29,31 @@ modal.querySelector('#kixCopyCartLink').onclick=async()=>{try{await navigator.cl
 modal.querySelector('#kixSaveCartImage').onclick=()=>{const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');canvas.width=900;canvas.height=180+rows.length*105;ctx.fillStyle='#101015';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#f5c15d';ctx.font='bold 42px Arial';ctx.fillText('KIX STORE',55,70);ctx.fillStyle='#fff';ctx.font='bold 28px Arial';ctx.fillText('قائمة المنتجات',55,120);let y=185,total=0;for(const x of rows){const price=Number(x.p.price_iqd)*x.qty;total+=price;ctx.fillStyle='#24212a';ctx.fillRect(45,y-38,810,82);ctx.fillStyle='#fff';ctx.font='bold 25px Arial';ctx.fillText(String(x.p.name).slice(0,38),70,y);ctx.font='22px Arial';ctx.fillStyle='#ccc';ctx.fillText('الكمية: '+x.qty,70,y+30);ctx.fillStyle='#f5c15d';ctx.textAlign='right';ctx.fillText(money(price),820,y+8);ctx.textAlign='left';y+=105;}ctx.fillStyle='#fff';ctx.font='bold 29px Arial';ctx.fillText('المجموع: '+money(total),55,y+15);ctx.fillStyle='#aaa';ctx.font='18px Arial';ctx.fillText('اطلبها من KIX STORE',55,y+55);const a=document.createElement('a');a.download='KIX-cart.png';a.href=canvas.toDataURL('image/png');a.click();};
 }
 function paymentUI(){
- const instructions=$('#paymentInstructions');
- const form=instructions?.closest('form')||[...document.querySelectorAll('form')].find(f=>f.querySelector('[name="payment_method"]'));
- if(!form||form.dataset.kixReceiptInit)return;form.dataset.kixReceiptInit='1';
+ if(location.pathname.endsWith('/owner.html'))return;
+ const checkoutButton=[...document.querySelectorAll('button,input[type="submit"],[role="button"]')].find(el=>/إتمام الطلب|تأكيد الطلب|إرسال الطلب|checkout/i.test(el.innerText||el.value||''));
+ const form=checkoutButton?.closest('form')||[...document.querySelectorAll('form')].find(f=>f.querySelector('[name="customer_name"],[name="phone"]'))||document.querySelector('form');
+ if(!form)return;
+ if(form.dataset.kixReceiptInit==='1')return;
  const select=form.querySelector('select[name="payment_method"]'),radios=[...form.querySelectorAll('input[name="payment_method"]')];
+ let option=radios.find(r=>r.value==='asiacell_card');
  if(select){if(![...select.options].some(o=>o.value==='asiacell_card')){const op=document.createElement('option');op.value='asiacell_card';op.textContent='تحويل بطاقة ماستر كارد آسياسيل';select.appendChild(op)}}
- else if(radios.length&&!radios.some(r=>r.value==='asiacell_card')){const sample=radios[0].closest('label')||radios[0].parentElement,label=document.createElement('label');label.className=sample?.className||'';label.innerHTML='<input type="radio" name="payment_method" value="asiacell_card"><span>تحويل بطاقة ماستر كارد آسياسيل</span>';(sample?.parentElement||radios[0].parentElement).appendChild(label)}
- else if(!select&&!radios.length){console.warn('KIX: payment method control not found');form.dataset.kixReceiptInit='';return}
- let panel=$('#kixReceiptPanel');
- if(!panel){panel=document.createElement('section');panel.id='kixReceiptPanel';panel.innerHTML='<div class="kix-card-number"><strong>رقم بطاقة آسياسيل ماستر كارد</strong><b dir="ltr">2427128562</b><button type="button" id="kixCopyCard">نسخ الرقم</button></div><p>حوّل قيمة الطلب النهائية إلى الرقم أعلاه، ثم أرفق صورة واضحة لقسيمة التحويل.</p><label class="kix-receipt-label">صورة قسيمة التحويل <input id="kixReceiptFile" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG أو PNG أو WEBP، بحد أقصى 5 ميغابايت</small></label><img id="kixReceiptPreview" alt="معاينة قسيمة التحويل" hidden>';(instructions||select?.parentElement||radios[0]?.parentElement||form).appendChild(panel)}
- const method=()=>select?select.value:form.querySelector('input[name="payment_method"]:checked')?.value,toggle=()=>{panel.hidden=method()!=='asiacell_card'};
- form.addEventListener('change',e=>{if(e.target.name==='payment_method')toggle()});toggle();
- const copy=$('#kixCopyCard');if(copy&&!copy.dataset.bound){copy.dataset.bound='1';copy.onclick=async()=>{try{await navigator.clipboard.writeText('2427128562');copy.textContent='تم النسخ ✓'}catch(_){prompt('رقم البطاقة','2427128562')}}}
- const input=$('#kixReceiptFile');if(input&&!input.dataset.bound){input.dataset.bound='1';input.addEventListener('change',e=>{const file=e.target.files?.[0],img=$('#kixReceiptPreview');if(!file){img.hidden=true;return}if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){alert('اختر صورة JPG أو PNG أو WEBP لا يتجاوز حجمها 5 ميغابايت.');e.target.value='';img.hidden=true;return}img.src=URL.createObjectURL(file);img.hidden=false})}
+ else{
+  if(!option){
+   const group=radios[0]?.closest('fieldset,[role="radiogroup"],.payment-methods,.payment-options')||radios[0]?.parentElement||form;
+   const label=document.createElement('label');label.className='kix-card-payment-option';
+   label.innerHTML='<input type="radio" name="payment_method" value="asiacell_card"><span>تحويل بطاقة ماستر كارد آسياسيل</span>';
+   const submit=checkoutButton&&form.contains(checkoutButton)?checkoutButton:null;
+   if(submit)form.insertBefore(label,submit);else group.appendChild(label);
+   option=label.querySelector('input');
+  }
+ }
+ let panel=form.querySelector('#kixReceiptPanel')||$('#kixReceiptPanel');
+ if(!panel){panel=document.createElement('section');panel.id='kixReceiptPanel';panel.innerHTML='<div class="kix-card-number"><strong>رقم بطاقة آسياسيل ماستر كارد</strong><b dir="ltr">2427128562</b><button type="button" id="kixCopyCard">نسخ الرقم</button></div><p>حوّل المبلغ الإجمالي للطلب إلى الرقم أعلاه، ثم أرفق صورة قسيمة التحويل.</p><label class="kix-receipt-label">إرفاق قسيمة التحويل <input id="kixReceiptFile" type="file" accept="image/jpeg,image/png,image/webp"><small>صورة JPG أو PNG أو WEBP، بحد أقصى 5 ميغابايت</small></label><img id="kixReceiptPreview" alt="معاينة قسيمة التحويل" hidden>';const submit=checkoutButton&&form.contains(checkoutButton)?checkoutButton:null;if(submit)form.insertBefore(panel,submit);else form.appendChild(panel)}
+ const method=()=>select?select.value:form.querySelector('input[name="payment_method"]:checked')?.value;
+ const toggle=()=>{panel.hidden=method()!=='asiacell_card'};
+ form.addEventListener('change',e=>{if(e.target.name==='payment_method')toggle()});form.dataset.kixReceiptInit='1';toggle();
+ const copy=panel.querySelector('#kixCopyCard');if(copy&&!copy.dataset.bound){copy.dataset.bound='1';copy.onclick=async()=>{try{await navigator.clipboard.writeText('2427128562');copy.textContent='تم النسخ ✓'}catch(_){prompt('رقم البطاقة','2427128562')}}}
+ const input=panel.querySelector('#kixReceiptFile');if(input&&!input.dataset.bound){input.dataset.bound='1';input.addEventListener('change',e=>{const file=e.target.files?.[0],img=panel.querySelector('#kixReceiptPreview');if(!file){img.hidden=true;return}if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){alert('اختر صورة JPG أو PNG أو WEBP لا يتجاوز حجمها 5 ميغابايت.');e.target.value='';img.hidden=true;return}img.src=URL.createObjectURL(file);img.hidden=false})}
 }
 async function fileBase64(file){return await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=reject;r.readAsDataURL(file)})}
 function interceptOrder(){const original=window.fetch.bind(window);window.fetch=async(input,init={})=>{const url=typeof input==='string'?input:input?.url||'';if(url.includes('/functions/v1/create-order')&&init.body){try{const body=JSON.parse(init.body);if(body.payment_method==='asiacell_card'){const file=$('#kixReceiptFile')?.files?.[0];if(!file)throw new Error('أرفق صورة قسيمة التحويل قبل تأكيد الطلب.');if(file.size>5*1024*1024)throw new Error('حجم صورة القسيمة أكبر من 5 ميغابايت.');body.receipt_mime=file.type;body.receipt_data=await fileBase64(file);init={...init,body:JSON.stringify(body)}}}catch(e){if(e instanceof Error&&e.message.includes('قسيمة')){alert(e.message);return new Response(JSON.stringify({error:e.message}),{status:400,headers:{'Content-Type':'application/json'}})}}const response=await original(input,init);try{const clone=response.clone(),data=await clone.json();if(data.order?.order_number)showOrderCopy(data.order.order_number)}catch(_){}return response};return original(input,init)}}
