@@ -2,3 +2,5 @@
 .kix-payment-receipt{display:grid;gap:8px;margin-top:12px;padding:12px;border:1px solid #66502d;border-radius:10px}.kix-payment-receipt a{color:#f5c15d}.kix-payment-receipt img{max-width:min(100%,420px);max-height:360px;object-fit:contain;border-radius:8px;background:#0d0c10}
 
 .kix-share-inline{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:14px 0;padding:12px;border:1px solid #8a6934;border-radius:12px;background:#17131b;color:#fff}.kix-share-inline strong{width:100%;color:#f5c15d}.kix-share-inline button{border:0;border-radius:9px;padding:10px 13px;background:#f5c15d;color:#171218;font-weight:800;cursor:pointer}.kix-card-number{width:100%;justify-content:space-between}.kix-card-number b{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
+
+.kix-order-search-empty{margin:0 0 14px;padding:12px;border:1px dashed #66505a;border-radius:10px;color:#f5c15d;background:#17141b}.kix-order-search-empty[hidden]{display:none}
