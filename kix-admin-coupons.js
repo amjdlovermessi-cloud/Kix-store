@@ -18,11 +18,11 @@ function mount(){
  box.innerHTML='<h2>🎟️ إدارة أكواد الخصم</h2><form id="kixCouponForm"><div class="kix-coupon-admin-grid"><label>كود الخصم<input name="code" required maxlength="32" placeholder="KIX10"></label><label>نوع الخصم<select name="discount_type"><option value="percent">نسبة مئوية %</option><option value="fixed">مبلغ ثابت بالدينار</option></select></label><label>قيمة الخصم<input name="discount_value" type="number" min="1" required></label><label>الحد الأدنى للطلب (د.ع)<input name="min_order_iqd" type="number" min="0" value="0"></label><label>أقصى خصم (د.ع)<input name="max_discount_iqd" type="number" min="1" placeholder="اختياري"></label><label>عدد الاستخدامات<input name="usage_limit" type="number" min="1" placeholder="غير محدود"></label><label>يبدأ في<input name="starts_at" type="datetime-local"></label><label>ينتهي في<input name="expires_at" type="datetime-local"></label><label><span>الحالة</span><select name="active"><option value="true">مفعّل</option><option value="false">متوقف</option></select></label></div><div class="kix-admin-coupon-actions"><button type="submit">حفظ الكوبون</button><button type="button" id="kixCouponReset" class="danger">إلغاء التعديل</button><span id="kixAdminCouponMsg"></span></div></form><div id="kixAdminCouponList" class="kix-coupon-list">جارٍ تحميل الأكواد...</div>';
  host.appendChild(box);
  box.querySelector('#kixCouponForm').addEventListener('submit',async e=>{
-  e.preventDefault();const f=new FormData(e.currentTarget),o=Object.fromEntries(f.entries());
+  e.preventDefault();const form=e.currentTarget;const f=new FormData(form),o=Object.fromEntries(f.entries());
   o.discount_value=Number(o.discount_value);o.min_order_iqd=Number(o.min_order_iqd||0);o.active=o.active==='true';
   o.max_discount_iqd=o.max_discount_iqd?Number(o.max_discount_iqd):null;o.usage_limit=o.usage_limit?Number(o.usage_limit):null;
   o.starts_at=o.starts_at?new Date(o.starts_at).toISOString():null;o.expires_at=o.expires_at?new Date(o.expires_at).toISOString():null;
-  try{await api('POST',o);$('#kixAdminCouponMsg').textContent='تم حفظ الكوبون.';e.currentTarget.reset();editing=null;await load();}
+  try{await api('POST',o);$('#kixAdminCouponMsg').textContent='تم حفظ الكوبون.';form.reset();editing=null;await load();}
   catch(err){$('#kixAdminCouponMsg').textContent=err.message;}
  });
  box.querySelector('#kixCouponReset').addEventListener('click',()=>{box.querySelector('form').reset();editing=null;$('#kixAdminCouponMsg').textContent='';});
