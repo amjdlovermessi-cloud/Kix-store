@@ -34,6 +34,7 @@ jobs:
           python security/patch_checkout.py site
           python security/patch_public_features.py site
           python security/patch_coupons.py site
+          python security/patch_order_details.py site
           python - <<'PY'
           from pathlib import Path
           root = Path("site")
