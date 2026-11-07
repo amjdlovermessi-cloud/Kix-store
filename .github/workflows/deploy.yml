@@ -33,6 +33,7 @@ jobs:
           unzip -q Kix-Store-Ready-to-Upload.zip -d site
           python security/patch_checkout.py site
           python security/patch_public_features.py site
+          python security/patch_coupons.py site
           python - <<'PY'
           from pathlib import Path
           root = Path("site")
