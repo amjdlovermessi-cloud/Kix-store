@@ -31,34 +31,72 @@ modal.querySelector('#kixSaveCartImage').onclick=()=>{const canvas=document.crea
 function paymentUI(){
  if(location.pathname.endsWith('/owner.html'))return;
  const checkoutButton=[...document.querySelectorAll('button,input[type="submit"],[role="button"]')].find(el=>/إتمام الطلب|تأكيد الطلب|إرسال الطلب|checkout/i.test(el.innerText||el.value||''));
- const form=checkoutButton?.closest('form')||[...document.querySelectorAll('form')].find(f=>f.querySelector('[name="customer_name"],[name="phone"]'))||document.querySelector('form');
+ const form=$('#checkoutForm')||checkoutButton?.closest('form')||[...document.querySelectorAll('form')].find(f=>f.querySelector('[name="customer_name"],[name="phone"]'))||document.querySelector('form');
  if(!form)return;
- if(form.dataset.kixReceiptInit==='1')return;
- const select=form.querySelector('select[name="payment_method"]'),radios=[...form.querySelectorAll('input[name="payment_method"]')];
+ const select=form.querySelector('select[name="payment_method"],#paymentMethod');
+ let radios=[...form.querySelectorAll('input[type="radio"][name="payment_method"]')];
  let option=radios.find(r=>r.value==='asiacell_card');
- if(select){if(![...select.options].some(o=>o.value==='asiacell_card')){const op=document.createElement('option');op.value='asiacell_card';op.textContent='تحويل بطاقة ماستر كارد آسياسيل';select.appendChild(op)}}
- else{
-  if(!option){
-   const group=radios[0]?.closest('fieldset,[role="radiogroup"],.payment-methods,.payment-options')||radios[0]?.parentElement||form;
-   const label=document.createElement('label');label.className='kix-card-payment-option';
-   label.innerHTML='<input type="radio" name="payment_method" value="asiacell_card"><span>تحويل بطاقة ماستر كارد آسياسيل</span>';
-   const submit=checkoutButton&&form.contains(checkoutButton)?checkoutButton:null;
-   if(submit)form.insertBefore(label,submit);else group.appendChild(label);
-   option=label.querySelector('input');
-  }
+ if(select){
+  let op=[...select.options].find(o=>o.value==='asiacell_card');
+  if(!op){op=document.createElement('option');op.value='asiacell_card';op.textContent='تحويل بطاقة ماستر كارد آسياسيل';select.appendChild(op)}
+  op.textContent='تحويل بطاقة ماستر كارد آسياسيل';
+ }else if(!option){
+  const group=radios[0]?.closest('fieldset,[role="radiogroup"],.payment-methods,.payment-options')||radios[0]?.parentElement||form;
+  const label=document.createElement('label');label.className='kix-card-payment-option';
+  label.innerHTML='<input type="radio" name="payment_method" value="asiacell_card"><span>تحويل بطاقة ماستر كارد آسياسيل</span>';
+  const submit=checkoutButton&&form.contains(checkoutButton)?checkoutButton:null;
+  if(submit)form.insertBefore(label,submit);else group.appendChild(label);
+  option=label.querySelector('input');
  }
- let panel=form.querySelector('#kixReceiptPanel')||$('#kixReceiptPanel');
- if(!panel){panel=document.createElement('section');panel.id='kixReceiptPanel';panel.innerHTML='<div class="kix-card-number"><strong>رقم بطاقة آسياسيل ماستر كارد</strong><b dir="ltr">2427128562</b><button type="button" id="kixCopyCard">نسخ الرقم</button></div><p>حوّل المبلغ الإجمالي للطلب إلى الرقم أعلاه، ثم أرفق صورة قسيمة التحويل.</p><label class="kix-receipt-label">إرفاق قسيمة التحويل <input id="kixReceiptFile" type="file" accept="image/jpeg,image/png,image/webp"><small>صورة JPG أو PNG أو WEBP، بحد أقصى 5 ميغابايت</small></label><img id="kixReceiptPreview" alt="معاينة قسيمة التحويل" hidden>';const submit=checkoutButton&&form.contains(checkoutButton)?checkoutButton:null;if(submit)form.insertBefore(panel,submit);else form.appendChild(panel)}
- const method=()=>select?select.value:form.querySelector('input[name="payment_method"]:checked')?.value;
+ let panel=form.querySelector('#kixReceiptPanel');
+ if(!panel){
+  panel=document.createElement('section');panel.id='kixReceiptPanel';
+  panel.innerHTML='<div class="kix-card-number"><strong>رقم بطاقة آسياسيل ماستر كارد</strong><b dir="ltr">2427128562</b><button type="button" id="kixCopyCard">نسخ الرقم</button></div><p>حوّل المبلغ الإجمالي للطلب إلى الرقم أعلاه، ثم أرفق صورة قسيمة التحويل.</p><label class="kix-receipt-label">إرفاق قسيمة التحويل <input id="kixReceiptFile" type="file" accept="image/jpeg,image/png,image/webp"><small>صورة JPG أو PNG أو WEBP، بحد أقصى 5 ميغابايت</small></label><img id="kixReceiptPreview" alt="معاينة قسيمة التحويل" hidden>';
+  const paymentAnchor=select||radios[0]?.closest('fieldset,[role="radiogroup"],.payment-methods,.payment-options')||radios[0]?.parentElement;
+  const submit=checkoutButton&&form.contains(checkoutButton)?checkoutButton:form.querySelector('button[type="submit"],input[type="submit"]');
+  if(paymentAnchor&&paymentAnchor.parentElement)paymentAnchor.insertAdjacentElement('afterend',panel);
+  else if(submit)form.insertBefore(panel,submit);
+  else form.appendChild(panel);
+ }
+ const method=()=>select?select.value:form.querySelector('input[type="radio"][name="payment_method"]:checked')?.value;
  const toggle=()=>{panel.hidden=method()!=='asiacell_card'};
- form.addEventListener('change',e=>{if(e.target.name==='payment_method')toggle()});form.dataset.kixReceiptInit='1';toggle();
- const copy=panel.querySelector('#kixCopyCard');if(copy&&!copy.dataset.bound){copy.dataset.bound='1';copy.onclick=async()=>{try{await navigator.clipboard.writeText('2427128562');copy.textContent='تم النسخ ✓'}catch(_){prompt('رقم البطاقة','2427128562')}}}
- const input=panel.querySelector('#kixReceiptFile');if(input&&!input.dataset.bound){input.dataset.bound='1';input.addEventListener('change',e=>{const file=e.target.files?.[0],img=panel.querySelector('#kixReceiptPreview');if(!file){img.hidden=true;return}if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){alert('اختر صورة JPG أو PNG أو WEBP لا يتجاوز حجمها 5 ميغابايت.');e.target.value='';img.hidden=true;return}img.src=URL.createObjectURL(file);img.hidden=false})}
+ if(form.dataset.kixReceiptInit!=='1'){
+  form.addEventListener('change',e=>{if(e.target.name==='payment_method'||e.target.id==='paymentMethod')toggle()});
+  form.dataset.kixReceiptInit='1';
+ }
+ toggle();
+ const copy=panel.querySelector('#kixCopyCard');
+ if(copy&&!copy.dataset.bound){copy.dataset.bound='1';copy.onclick=async()=>{try{await navigator.clipboard.writeText('2427128562');copy.textContent='تم النسخ ✓'}catch(_){prompt('رقم البطاقة','2427128562')}}}
+ const input=panel.querySelector('#kixReceiptFile');
+ if(input&&!input.dataset.bound){input.dataset.bound='1';input.addEventListener('change',e=>{const file=e.target.files?.[0],img=panel.querySelector('#kixReceiptPreview');if(!file){img.hidden=true;return}if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5*1024*1024){alert('اختر صورة JPG أو PNG أو WEBP لا يتجاوز حجمها 5 ميغابايت.');e.target.value='';img.hidden=true;return}img.src=URL.createObjectURL(file);img.hidden=false})}
 }
 async function fileBase64(file){return await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(',')[1]);r.onerror=reject;r.readAsDataURL(file)})}
 function interceptOrder(){const original=window.fetch.bind(window);window.fetch=async(input,init={})=>{const url=typeof input==='string'?input:input?.url||'';if(url.includes('/functions/v1/create-order')&&init.body){try{const body=JSON.parse(init.body);if(body.payment_method==='asiacell_card'){const file=$('#kixReceiptFile')?.files?.[0];if(!file)throw new Error('أرفق صورة قسيمة التحويل قبل تأكيد الطلب.');if(file.size>5*1024*1024)throw new Error('حجم صورة القسيمة أكبر من 5 ميغابايت.');body.receipt_mime=file.type;body.receipt_data=await fileBase64(file);init={...init,body:JSON.stringify(body)}}}catch(e){if(e instanceof Error&&e.message.includes('قسيمة')){alert(e.message);return new Response(JSON.stringify({error:e.message}),{status:400,headers:{'Content-Type':'application/json'}})}}const response=await original(input,init);try{const clone=response.clone(),data=await clone.json();if(data.order?.order_number)showOrderCopy(data.order.order_number)}catch(_){}return response};return original(input,init)}}
 function showOrderCopy(code){const scan=()=>{const nodes=[...document.querySelectorAll('body *')].filter(el=>el.children.length===0&&el.textContent.includes(code));if(!nodes.length)return false;const target=nodes[0].parentElement;if(target.querySelector('[data-kix-copy-order]'))return true;const b=document.createElement('button');b.dataset.kixCopyOrder='1';b.className='kix-copy-order';b.textContent='نسخ كود الطلب';b.onclick=async()=>{try{await navigator.clipboard.writeText(code);b.textContent='تم نسخ الكود ✓'}catch(_){prompt('كود الطلب',code)}};target.appendChild(b);return true};if(scan())return;const observer=new MutationObserver(()=>{if(scan())observer.disconnect()});observer.observe(document.body,{childList:true,subtree:true});setTimeout(()=>observer.disconnect(),12000)}
-function adminSearch(){const host=$('#adminOrders');if(!host||$('#kixOrderSearch'))return;const input=document.createElement('input');input.id='kixOrderSearch';input.placeholder='ابحث بكود الطلب KIX-...';input.type='search';input.className='kix-order-search';host.parentElement.insertBefore(input,host);input.addEventListener('input',()=>{const q=input.value.trim().toLowerCase();host.querySelectorAll('.admin-row').forEach(row=>row.hidden=q&&!row.textContent.toLowerCase().includes(q))})}
+function adminSearch(){
+ const host=$('#adminOrders');if(!host)return;
+ let input=$('#kixOrderSearch');
+ if(!input){input=document.createElement('input');input.id='kixOrderSearch';input.placeholder='ابحث بكود الطلب KIX-... أو اسم الزبون أو الهاتف';input.type='search';input.className='kix-order-search';input.autocomplete='off';input.setAttribute('aria-label','البحث في الطلبات');host.parentElement.insertBefore(input,host);}
+ let empty=$('#kixOrderSearchEmpty');
+ if(!empty){empty=document.createElement('p');empty.id='kixOrderSearchEmpty';empty.className='kix-order-search-empty';empty.textContent='لا توجد طلبات تطابق البحث.';empty.hidden=true;empty.setAttribute('role','status');empty.setAttribute('aria-live','polite');host.insertAdjacentElement('afterend',empty);}
+ if(input.dataset.kixBound==='1')return;
+ const run=()=>{
+  const q=input.value.trim().toLocaleLowerCase();
+  let rows=[...host.querySelectorAll('.admin-row,[data-order-row],.order-card,.order-item,tr')];
+  if(!rows.length)rows=[...host.children].filter(el=>el!==empty&&el.id!=='kixOrderSearchEmpty');
+  let shown=0;
+  rows.forEach(row=>{
+   const attrs=['data-order-number','data-order-code','data-phone','data-customer-name'].map(k=>row.getAttribute(k)||'').join(' ');
+   const text=(row.textContent||'')+' '+attrs;
+   const match=!q||text.toLocaleLowerCase().includes(q);
+   row.hidden=!match;if(match)shown++;
+  });
+  empty.hidden=!q||shown>0;
+ };
+ input.addEventListener('input',run);
+ input.dataset.kixBound='1';
+ run();
+}
 function init(){importShared();addShareButton();paymentUI();adminSearch();if(window.supabase&&cfg.supabaseUrl&&cfg.supabaseAnonKey&&!client)client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey)}
 document.addEventListener('DOMContentLoaded',()=>{init();interceptOrder();new MutationObserver(()=>{paymentUI();adminSearch()}).observe(document.body,{childList:true,subtree:true})});
 })();
