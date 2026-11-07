@@ -27,3 +27,4 @@ function adminSearch(){const host=$('#adminOrders');if(!host||$('#kixOrderSearch
 function init(){importShared();addShareButton();paymentUI();adminSearch();if(window.supabase&&cfg.supabaseUrl&&cfg.supabaseAnonKey&&!client)client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey)}
 document.addEventListener('DOMContentLoaded',()=>{init();interceptOrder();new MutationObserver(()=>{paymentUI();adminSearch()}).observe(document.body,{childList:true,subtree:true})});
 })();
+// KIX Store feature bundle v2
