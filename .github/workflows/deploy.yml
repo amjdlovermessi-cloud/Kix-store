@@ -65,6 +65,7 @@ jobs:
               if "</head>" in html:
                   html = html.replace("</head>", tags + "\n</head>", 1)
                   page.write_text(html, encoding="utf-8")
+          PY
           CONFIG_FILE="$(find site -type f -name config.js -print -quit)"
           if [ -z "$CONFIG_FILE" ]; then
             CONFIG_FILE="site/config.js"
