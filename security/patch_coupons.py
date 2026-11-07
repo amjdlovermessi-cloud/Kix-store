@@ -1,6 +1,11 @@
 from pathlib import Path
 import sys
 site=Path(sys.argv[1])
+root=Path(__file__).resolve().parent.parent
+for name in ('kix-coupons.css','kix-coupons.js','kix-admin-coupons.js'):
+    src=root/name
+    if not src.exists(): raise SystemExit(f'Missing coupon asset: {src}')
+    (site/name).write_bytes(src.read_bytes())
 index=site/'index.html'
 html=index.read_text(encoding='utf-8')
 if 'kix-coupons.js' not in html:
