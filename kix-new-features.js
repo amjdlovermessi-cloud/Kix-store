@@ -76,26 +76,32 @@ function showOrderCopy(code){const scan=()=>{const nodes=[...document.querySelec
 function adminSearch(){
  const host=$('#adminOrders');if(!host)return;
  let input=$('#kixOrderSearch');
- if(!input){input=document.createElement('input');input.id='kixOrderSearch';input.placeholder='ابحث بكود الطلب KIX-... أو اسم الزبون أو الهاتف';input.type='search';input.className='kix-order-search';input.autocomplete='off';input.setAttribute('aria-label','البحث في الطلبات');host.parentElement.insertBefore(input,host);}
- let empty=$('#kixOrderSearchEmpty');
- if(!empty){empty=document.createElement('p');empty.id='kixOrderSearchEmpty';empty.className='kix-order-search-empty';empty.textContent='لا توجد طلبات تطابق البحث.';empty.hidden=true;empty.setAttribute('role','status');empty.setAttribute('aria-live','polite');host.insertAdjacentElement('afterend',empty);}
+ if(!input){input=document.createElement('input');input.id='kixOrderSearch';input.placeholder='ابحث بكود الطلب KIX-...';input.type='search';input.className='kix-order-search';input.autocomplete='off';input.setAttribute('aria-label','البحث بكود الطلب');host.parentElement.insertBefore(input,host);}
+ let results=$('#kixOrderSearchResults');
+ if(!results){results=document.createElement('section');results.id='kixOrderSearchResults';results.className='kix-order-search-results';results.hidden=true;results.setAttribute('aria-live','polite');host.insertAdjacentElement('beforebegin',results);}
  if(input.dataset.kixBound==='1')return;
- const run=()=>{
-  const q=input.value.trim().toLocaleLowerCase();
-  let rows=[...host.querySelectorAll('.admin-row,[data-order-row],.order-card,.order-item,tr')];
-  if(!rows.length)rows=[...host.children].filter(el=>el!==empty&&el.id!=='kixOrderSearchEmpty');
-  let shown=0;
-  rows.forEach(row=>{
-   const attrs=['data-order-number','data-order-code','data-phone','data-customer-name'].map(k=>row.getAttribute(k)||'').join(' ');
-   const text=(row.textContent||'')+' '+attrs;
-   const match=!q||text.toLocaleLowerCase().includes(q);
-   row.hidden=!match;if(match)shown++;
-  });
-  empty.hidden=!q||shown>0;
+ let requestNo=0;
+ const escHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const run=async()=>{
+  const q=input.value.trim().toUpperCase(),seq=++requestNo;
+  if(!q){results.hidden=true;results.innerHTML='';host.hidden=false;host.querySelectorAll('.admin-row,[data-order-row],.order-card,.order-item,tr').forEach(row=>row.hidden=false);return}
+  host.hidden=true;results.hidden=false;results.innerHTML='<p class="kix-order-search-status">جاري البحث عن الطلب...</p>';
+  if(!window.supabase||!cfg.supabaseUrl||!cfg.supabaseAnonKey){results.innerHTML='<p class="kix-order-search-status">تعذر الاتصال بقاعدة البيانات. حدّث الصفحة وسجّل الدخول مجدداً.</p>';return}
+  try{
+   if(!client)client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+   const safe=q.replace(/[%_]/g,'');
+   const {data,error}=await client.from('orders').select('id,order_number,customer_name,phone,total_iqd,status,created_at,order_items(quantity,unit_price_iqd,product_name)').ilike('order_number','%'+safe+'%').order('created_at',{ascending:false}).limit(25);
+   if(seq!==requestNo)return;
+   if(error)throw error;
+   if(!data?.length){results.innerHTML='<p class="kix-order-search-status">لا توجد طلبات بهذا الكود. تأكد من كتابة الكود بصورة صحيحة.</p>';return}
+   results.innerHTML='<div class="kix-order-search-heading">نتائج البحث: '+data.length+' طلب</div>'+data.map(order=>{
+    const items=(order.order_items||[]).map(item=>'<li>'+escHtml(item.product_name||'منتج')+' × '+Number(item.quantity||0)+'</li>').join('');
+    return '<article class="kix-order-search-result"><div class="kix-order-search-top"><strong dir="ltr">'+escHtml(order.order_number)+'</strong><b>'+money(order.total_iqd)+'</b></div><div class="kix-order-search-meta"><span>الزبون: '+escHtml(order.customer_name||'غير محدد')+'</span><span>الهاتف: '+escHtml(order.phone||'غير محدد')+'</span><span>الحالة: '+escHtml(order.status||'غير محددة')+'</span><span>التاريخ: '+escHtml(order.created_at?new Date(order.created_at).toLocaleString('ar-IQ'):'')+'</span></div>'+(items?'<ul>'+items+'</ul>':'')+'</article>';
+   }).join('');
+  }catch(err){if(seq===requestNo)results.innerHTML='<p class="kix-order-search-status">تعذر تنفيذ البحث: '+escHtml(err.message||'خطأ غير معروف')+'</p>'}
  };
  input.addEventListener('input',run);
  input.dataset.kixBound='1';
- run();
 }
 function init(){importShared();addShareButton();paymentUI();adminSearch();if(window.supabase&&cfg.supabaseUrl&&cfg.supabaseAnonKey&&!client)client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey)}
 document.addEventListener('DOMContentLoaded',()=>{init();interceptOrder();new MutationObserver(()=>{paymentUI();adminSearch()}).observe(document.body,{childList:true,subtree:true})});
