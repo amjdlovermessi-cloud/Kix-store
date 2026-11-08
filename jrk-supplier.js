@@ -140,7 +140,8 @@
     }
   }
   $("#refresh").addEventListener("click",async()=>{ $("#refresh").disabled=true; try{await callCatalog()}catch(e){notice.hidden=false;notice.classList.add("error");notice.textContent=e.message} finally{$("#refresh").disabled=false} });
-  $("#search").addEventListener("input",render);\n  $("#importAll").addEventListener("click",importAllProducts);
+  $("#search").addEventListener("input",render);
+  $("#importAll").addEventListener("click",importAllProducts);
   $("#prev").addEventListener("click",async()=>{offset=Math.max(0,offset-limit);try{await callCatalog()}catch(e){notice.hidden=false;notice.classList.add("error");notice.textContent=e.message}});
   $("#next").addEventListener("click",async()=>{if(nextOffset===null)return;offset=nextOffset;try{await callCatalog()}catch(e){notice.hidden=false;notice.classList.add("error");notice.textContent=e.message}});
   init().catch(e=>{notice.classList.add("error");notice.textContent=e.message});
