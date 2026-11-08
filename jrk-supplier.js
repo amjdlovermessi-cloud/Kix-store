@@ -116,8 +116,31 @@
     notice.hidden=true; dashboard.hidden=false;
     await callCatalog();
   }
+  async function importAllProducts() {
+    const button=$("#importAll"), result=$("#bulkResult");
+    if(!confirm("تأكيد استيراد جميع منتجات Jrk AI إلى KIX Store؟\\nسيتم تطبيق هامش الربح المتفق عليه وتحويل الأسعار إلى الدينار. المنتجات غير المتوفرة ستُحفظ كمسودات. لن يتم شراء أي منتج من المورد.")) return;
+    button.disabled=true; button.textContent="جارٍ استيراد جميع المنتجات...";
+    result.hidden=false; result.className="notice"; result.textContent="يتم جلب كتالوج المورد واستيراد المنتجات على دفعات. لا تغلق الصفحة.";
+    try {
+      const res=await fetch(config.supabaseUrl+"/functions/v1/jrk-import-all",{
+        method:"POST",
+        headers:{apikey:config.supabaseAnonKey,Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},
+        body:"{}"
+      });
+      const data=await res.json();
+      if(!res.ok||!data.ok) throw new Error(data.error||"تعذر استيراد الكتالوج.");
+      const s=data.summary||{};
+      result.textContent="اكتمل الاستيراد: "+s.imported+" منتج جديد. المنشور: "+s.active+". المسودات غير المنشورة: "+s.drafts+". موجود مسبقاً: "+s.skipped_existing+". غير صالح: "+s.invalid+". أخطاء: "+(s.errors?.length||0)+".";
+      if(s.errors?.length) result.textContent+=" أول الأخطاء: "+s.errors.slice(0,3).join(" | ");
+      await callCatalog();
+    } catch(e) {
+      result.className="notice error"; result.textContent="فشل الاستيراد: "+e.message;
+    } finally {
+      button.disabled=false; button.textContent="إعادة فحص واستيراد المنتجات غير المستوردة";
+    }
+  }
   $("#refresh").addEventListener("click",async()=>{ $("#refresh").disabled=true; try{await callCatalog()}catch(e){notice.hidden=false;notice.classList.add("error");notice.textContent=e.message} finally{$("#refresh").disabled=false} });
-  $("#search").addEventListener("input",render);
+  $("#search").addEventListener("input",render);\n  $("#importAll").addEventListener("click",importAllProducts);
   $("#prev").addEventListener("click",async()=>{offset=Math.max(0,offset-limit);try{await callCatalog()}catch(e){notice.hidden=false;notice.classList.add("error");notice.textContent=e.message}});
   $("#next").addEventListener("click",async()=>{if(nextOffset===null)return;offset=nextOffset;try{await callCatalog()}catch(e){notice.hidden=false;notice.classList.add("error");notice.textContent=e.message}});
   init().catch(e=>{notice.classList.add("error");notice.textContent=e.message});
