@@ -118,7 +118,7 @@
   }
   async function importAllProducts() {
     const button=$("#importAll"), result=$("#bulkResult");
-    if(!confirm("تأكيد استيراد جميع منتجات Jrk AI إلى KIX Store؟\\nسيتم تطبيق هامش الربح المتفق عليه وتحويل الأسعار إلى الدينار. المنتجات غير المتوفرة ستُحفظ كمسودات. لن يتم شراء أي منتج من المورد.")) return;
+    if(!confirm("تأكيد استيراد جميع منتجات Jrk AI إلى KIX Store؟\nسيتم تطبيق هامش الربح المتفق عليه وتحويل الأسعار إلى الدينار. المنتجات غير المتوفرة ستُحفظ كمسودات. لن يتم شراء أي منتج من المورد.")) return;
     button.disabled=true; button.textContent="جارٍ استيراد جميع المنتجات...";
     result.hidden=false; result.className="notice"; result.textContent="يتم جلب كتالوج المورد واستيراد المنتجات على دفعات. لا تغلق الصفحة.";
     try {
