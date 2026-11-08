@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b0b0d">
+  <title>Jrk AI | KIX Store</title>
+  <link rel="stylesheet" href="jrk-supplier.css">
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="jrk-supplier.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="back" href="owner.html">← لوحة المالك</a>
+    <div><span class="eyebrow">KIX STORE · SUPPLIER HUB</span><h1>كتالوج Jrk AI</h1></div>
+    <span class="lock">خاص بالمالك</span>
+  </header>
+  <main class="wrap">
+    <section id="notice" class="notice">جارٍ التحقق من جلسة المالك...</section>
+    <section id="dashboard" hidden>
+      <div class="wallet-grid">
+        <article class="wallet"><small>رصيد المحفظة</small><strong id="walletBalance">—</strong><span id="walletCurrency">USD</span></article>
+        <article class="wallet"><small>الرصيد المحجوز</small><strong id="walletHeld">—</strong><span id="accountStatus">حالة الحساب: —</span></article>
+        <article class="wallet"><small>عدد منتجات المورد</small><strong id="totalProducts">—</strong><span>حسب بيانات Jrk AI</span></article>
+      </div>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="ابحث عن منتج..." autocomplete="off">
+        <button id="refresh" class="secondary">تحديث الكتالوج</button>
+      </div>
+      <p class="hint">الأسعار أدناه هي أسعار المورد بالدولار. التوفر المجهول يحتاج فحصاً مباشراً قبل البيع. الاستيراد لا ينفذ عملية شراء.</p>
+      <div id="products" class="products"></div>
+      <div class="pagination"><button id="prev" class="secondary" disabled>السابق</button><span id="pageInfo">—</span><button id="next" class="secondary" disabled>التالي</button></div>
+    </section>
+  </main>
+  <template id="productTemplate">
+    <article class="product">
+      <div class="product-head"><div><span class="category"></span><h2 class="name"></h2></div><span class="availability"></span></div>
+      <p class="description"></p>
+      <div class="facts">
+        <div><small>سعر المورد</small><strong class="cost"></strong></div>
+        <div><small>الضمان</small><strong class="warranty"></strong></div>
+        <div><small>نوع الإدخال</small><strong class="inputType"></strong></div>
+      </div>
+      <div class="inputNote"></div>
+      <div class="import-fields">
+        <label>قسم المتجر<select class="categorySelect"></select></label>
+        <label>سعر البيع بالدينار العراقي<input class="retail" type="number" min="1" step="250" placeholder="مثال: 15000"></label>
+        <label>وصف المنتج (اختياري)<textarea class="customDescription" rows="2" placeholder="وصف يظهر للزبون"></textarea></label>
+        <button class="importButton">استيراد إلى المتجر</button>
+      </div>
+      <div class="result" aria-live="polite"></div>
+      <small class="supplierId"></small>
+    </article>
+  </template>
+</body>
+</html>
