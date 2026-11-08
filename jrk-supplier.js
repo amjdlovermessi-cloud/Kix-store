@@ -100,21 +100,35 @@
       result.className="result error"; result.textContent=e.message;
     }
   }
+  const withTimeout = (promise, label, ms=10000) => Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("انتهت مهلة الاتصال أثناء: "+label+". تحقق من الإنترنت ثم أعد تحميل الصفحة.")), ms))
+  ]);
   async function init() {
-    const {data,error}=await client.auth.getSession();
+    notice.textContent="جارٍ قراءة جلسة تسجيل الدخول...";
+    let authResult;
+    try { authResult=await withTimeout(client.auth.getSession(),"قراءة جلسة المالك"); }
+    catch(e) { throw new Error(e.message+" إذا استمرت المشكلة افتح لوحة المالك وسجّل خروج ثم دخول."); }
+    const {data,error}=authResult;
     session=data?.session;
     if (error || !session) {
       notice.classList.add("error");
-      notice.innerHTML='سجّل دخولك أولاً من <a href="owner.html" style="color:#ff7b86">لوحة المالك</a> ثم ارجع لهذه الصفحة.';
+      notice.innerHTML='لم أجد جلسة دخول محفوظة. افتح <a href="owner.html" style="color:#ff7b86">لوحة المالك</a> وسجّل الدخول، ثم ارجع وافتح هذه الصفحة من جديد.';
       return;
     }
-    const {data:userData}=await client.auth.getUser();
-    const {data:profile}=await client.from("profiles").select("role").eq("id",userData.user.id).maybeSingle();
-    if (profile?.role !== "owner") {
-      notice.classList.add("error"); notice.textContent="هذه الصفحة مخصصة لحساب مالك المتجر فقط."; return;
+    notice.textContent="تم العثور على الجلسة، جارٍ التحقق من صلاحية المالك...";
+    const userResult=await withTimeout(client.auth.getUser(),"التحقق من المستخدم");
+    const userData=userResult.data;
+    if(userResult.error || !userData?.user?.id) throw new Error(userResult.error?.message || "تعذر تحديد المستخدم من جلسة الدخول.");
+    const profileResult=await withTimeout(client.from("profiles").select("role").eq("id",userData.user.id).maybeSingle(),"قراءة صلاحية المالك");
+    if(profileResult.error) throw new Error("تعذر قراءة صلاحية الحساب: "+profileResult.error.message);
+    if (profileResult.data?.role !== "owner") {
+      notice.classList.add("error"); notice.textContent="الحساب الحالي ليس حساب مالك المتجر."; return;
     }
-    notice.hidden=true; dashboard.hidden=false;
+    notice.textContent="تم التحقق من المالك، جارٍ تحميل كتالوج Jrk AI...";
+    notice.hidden=false; dashboard.hidden=false;
     await callCatalog();
+    notice.hidden=true;
   }
   async function importAllProducts() {
     const button=$("#importAll"), result=$("#bulkResult");
