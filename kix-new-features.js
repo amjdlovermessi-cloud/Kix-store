@@ -20,7 +20,12 @@ function addShareButton(){
   actions.querySelector('#kixShareImageInline').onclick=()=>openShare('image');
   actions.querySelector('#kixShareLinkInline').onclick=()=>openShare('link');
  };
- install();new MutationObserver(install).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','aria-hidden']});
+ install();
+ // Cart UI changes are child-list changes. Watching every class/style mutation
+ // caused repeated full-page scans while users interacted with the store.
+ let queued=false;
+ const observer=new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;install()})});
+ observer.observe(document.body,{childList:true,subtree:true});
 }
 async function openShare(mode){const cart=cartRead();if(!cart.length){alert('السلة فارغة حالياً. أضف المنتجات أولاً.');return}let products=[];try{products=await getProducts(cart)}catch(e){alert('تعذر تحميل تفاصيل السلة.');return}const byId=new Map(products.map(p=>[String(p.id),p]));const rows=cart.map(x=>({id:x.id,qty:Number(x.qty||1),p:byId.get(String(x.id))})).filter(x=>x.p);if(!rows.length){alert('لم نعثر على المنتجات الموجودة في السلة.');return}
 const url=new URL(location.href);url.search='';url.hash='';url.searchParams.set('sharecart',b64url(JSON.stringify(rows.map(x=>({id:x.id,qty:x.qty})))));
@@ -104,6 +109,19 @@ function adminSearch(){
  input.dataset.kixBound='1';
 }
 function init(){importShared();addShareButton();paymentUI();adminSearch();if(window.supabase&&cfg.supabaseUrl&&cfg.supabaseAnonKey&&!client)client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey)}
-document.addEventListener('DOMContentLoaded',()=>{init();interceptOrder();new MutationObserver(()=>{paymentUI();adminSearch()}).observe(document.body,{childList:true,subtree:true})});
+document.addEventListener('DOMContentLoaded',()=>{
+ init();interceptOrder();
+ // Initialize checkout/admin enhancements once. If the relevant area is
+ // rendered asynchronously, watch only until it appears, then disconnect.
+ const ownerPage=location.pathname.endsWith('/owner.html');
+ const ready=()=>ownerPage?!!$('#adminOrders'):!!($('#checkoutForm')||document.querySelector('form'));
+ if(ready())return;
+ const observer=new MutationObserver(()=>{
+  if(!ready())return;
+  if(ownerPage)adminSearch();else paymentUI();
+  observer.disconnect();
+ });
+ observer.observe(document.body,{childList:true,subtree:true});
+});
 })();
 // KIX Store feature bundle v2
