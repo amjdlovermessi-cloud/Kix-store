@@ -15,6 +15,32 @@ if 'id="kixPublicStats"' not in html:
     section='''<section class="wrap kix-public-panel" id="kixPublicStats"><span class="eyebrow">KIX COMMUNITY</span><h2>أرقام المتجر وآراء الزبائن</h2><div class="kix-stat-grid"><div class="kix-stat"><strong id="kixVisits">—</strong><span>زيارة مسجلة</span></div><div class="kix-stat"><strong id="kixOrders">—</strong><span>طلب مكتمل أو قيد التجهيز</span></div><div class="kix-stat"><strong id="kixAverage">—</strong><span>متوسط التقييم</span></div><div class="kix-stat"><strong id="kixRatings">—</strong><span>تقييم منشور</span></div></div></section><section class="wrap kix-public-panel" id="kixReviews"><span class="eyebrow">CUSTOMER VOICES</span><h2>تقييمات وتجارب الزبائن</h2><div class="kix-review-layout"><div id="kixReviewList" class="kix-review-list"><p class="kix-empty">جاري تحميل التقييمات...</p></div><form id="kixReviewForm" class="kix-review-form"><h3>شاركنا رأيك</h3><label>الاسم الظاهر<input name="display_name" required minlength="2" maxlength="60" placeholder="اسم مستعار أو اسمك"></label><label>التقييم<select name="rating" required><option value="5">5 نجوم</option><option value="4">4 نجوم</option><option value="3">3 نجوم</option><option value="2">نجمتان</option><option value="1">نجمة واحدة</option></select></label><label>تعليقك<textarea name="comment" required minlength="8" maxlength="700" rows="4" placeholder="اكتب تجربتك مع KIX..."></textarea></label><button class="btn primary" type="submit">إرسال التقييم</button><p id="kixReviewMessage" class="kix-review-message">التقييمات تُراجع قبل ظهورها للعامة.</p></form></div></section>'''
     html=html.replace('    <section class="contact-section wrap"',section+'\n    <section class="contact-section wrap"',1)
 store=site/'store.js'; store_js=store.read_text(encoding='utf-8')
+# Render fallback data immediately. A single stalled Supabase request (especially
+# site_settings) must never keep both category and product sections on loaders.
+load_start = store_js.find('async function loadData(){')
+load_end = store_js.find('\nfunction renderCategories', load_start)
+if load_start < 0 or load_end < 0:
+    raise SystemExit('Could not locate loadData() safely.')
+new_load = """async function loadData(){
+  try{renderCategories();}catch(e){console.error('KIX fallback categories render failed',e);}
+  try{renderProducts();}catch(e){console.error('KIX fallback products render failed',e);}
+  try{renderCart();updatePaymentInfo();}catch(e){console.warn('KIX initial cart/payment render failed',e);}
+  if(!sb){console.warn('KIX Supabase client unavailable; showing fallback catalog.');return;}
+  const timed=(query,label)=>Promise.race([Promise.resolve(query),new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' request timed out')),10000))]);
+  const results=await Promise.allSettled([
+    timed(sb.from('categories').select('*').eq('active',true).order('sort_order'),'categories'),
+    timed(sb.from('products').select('*').eq('active',true).order('sort_order'),'products'),
+    timed(sb.from('site_settings').select('key,value'),'site_settings')
+  ]);
+  if(results[0].status==='fulfilled'&&!results[0].value.error&&results[0].value.data?.length){categories=results[0].value.data;try{renderCategories();}catch(e){console.error('KIX categories render failed',e);}}
+  else if(results[0].status==='rejected'||results[0].value?.error)console.warn('KIX categories query failed',results[0].reason||results[0].value.error);
+  if(results[1].status==='fulfilled'&&!results[1].value.error&&results[1].value.data){products=results[1].value.data;try{renderProducts();}catch(e){console.error('KIX products render failed',e);}}
+  else if(results[1].status==='rejected'||results[1].value?.error)console.warn('KIX products query failed',results[1].reason||results[1].value.error);
+  if(results[2].status==='fulfilled'&&!results[2].value.error&&results[2].value.data){results[2].value.data.forEach(x=>settings[x.key]=x.value);document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>a.href='https://wa.me/'+settings.whatsapp_number);document.querySelectorAll('a[href^="https://t.me/"]').forEach(a=>a.href='https://t.me/'+settings.telegram_username);}
+  else if(results[2].status==='rejected'||results[2].value?.error)console.warn('KIX settings query failed',results[2].reason||results[2].value.error);
+  try{renderCart();updatePaymentInfo();}catch(e){console.warn('KIX final cart/payment render failed',e);}
+}"""
+store_js = store_js[:load_start] + new_load + store_js[load_end:]
 # Render each storefront area independently so one UI exception cannot strand both loaders.
 old_render = 'renderCategories();renderProducts();renderCart();updatePaymentInfo();'
 new_render = "try{renderCategories()}catch(e){console.error('KIX categories render failed',e);const el=$('#categoryGrid');if(el)el.innerHTML='<div class=\"loading\">تعذر عرض الأقسام. حدّث الصفحة وحاول مجدداً.</div>';}try{renderProducts()}catch(e){console.error('KIX products render failed',e);const el=$('#productGrid');if(el)el.innerHTML='<div class=\"loading\">تعذر عرض المنتجات. حدّث الصفحة وحاول مجدداً.</div>';}try{renderCart()}catch(e){console.error('KIX cart render failed',e)}try{updatePaymentInfo()}catch(e){console.error('KIX payment render failed',e)}"
