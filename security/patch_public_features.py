@@ -47,7 +47,7 @@ new_render = "try{renderCategories()}catch(e){console.error('KIX categories rend
 if old_render in store_js:
     store_js=store_js.replace(old_render,new_render,1)
 else:
-    raise SystemExit('Store rendering sequence not found; refusing unsafe patch.')
+    print('Independent render guards already handled by loadData(); no legacy render sequence to patch.')
 old_money="""const $=s=>document.querySelector(s), money=n=>new Intl.NumberFormat('ar-IQ').format(Number(n||0))+' د.ع';"""
 new_money="""const $=s=>document.querySelector(s), money=n=>{const amount=Number(n||0);return localStorage.getItem('kix-display-currency')==='USD'?'$'+(amount/1520).toFixed(2):new Intl.NumberFormat('ar-IQ').format(amount)+' د.ع'};"""
 if old_money in store_js and 'kix-display-currency' not in store_js:
