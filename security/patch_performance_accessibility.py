@@ -58,7 +58,14 @@ asset.write_text("""/* KIX lightweight mascot and readable category headings */
   #categoryGrid .category-card small{font-size:11px!important}
 }
 """, encoding="utf-8")
-tag = '<link rel="stylesheet" href="kix-store-performance.css?v=20261109-1">'
+tag = '<link rel="stylesheet" href="kix-store-performance.css?v=20261109-2">'
+for old, new in (
+    ('kix-currency.js', 'kix-currency.js?v=20261109-2'),
+    ('kix-coupons.js', 'kix-coupons.js?v=20261109-2'),
+    ('kix-new-features.js?v=20261107-5', 'kix-new-features.js?v=20261109-2'),
+):
+    html = html.replace('src="' + old + '"', 'src="' + new + '"')
+
 if "kix-store-performance.css" not in html and "</head>" in html:
     html = html.replace("</head>", tag + "\n</head>", 1)
 index.write_text(html, encoding="utf-8")
@@ -67,7 +74,7 @@ index.write_text(html, encoding="utf-8")
 store_js = site / "store.js"
 if store_js.exists():
     source = store_js.read_text(encoding="utf-8")
-    source, count = re.subn(r'function\\s+initMascot\\s*\\(\\)\\s*\\{.*?\\}', 'function initMascot(){}', source, count=1, flags=re.S)
+    source, count = re.subn(r'function\s+initMascot\s*\(\)\s*\{.*?\}', 'function initMascot(){}', source, count=1, flags=re.S)
     if count != 1:
         raise SystemExit("Could not safely disable mascot click animation in store.js")
     store_js.write_text(source, encoding="utf-8")
