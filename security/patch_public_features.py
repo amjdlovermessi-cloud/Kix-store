@@ -43,7 +43,7 @@ new_load = """async function loadData(){
 store_js = store_js[:load_start] + new_load + store_js[load_end:]
 # Render each storefront area independently so one UI exception cannot strand both loaders.
 old_render = 'renderCategories();renderProducts();renderCart();updatePaymentInfo();'
-new_render = "try{renderCategories()}catch(e){console.error('KIX categories render failed',e);const el=$('#categoryGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض الأقسام: '+String(e&&e.message||e)+'</div>';const el=$('#categoryGrid');if(el)el.innerHTML='<div class=\"loading\">تعذر عرض الأقسام. حدّث الصفحة وحاول مجدداً.</div>';}try{renderProducts()}catch(e){console.error('KIX products render failed',e);const el=$('#productGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض المنتجات: '+String(e&&e.message||e)+'</div>';const el=$('#productGrid');if(el)el.innerHTML='<div class=\"loading\">تعذر عرض المنتجات. حدّث الصفحة وحاول مجدداً.</div>';}try{renderCart()}catch(e){console.error('KIX cart render failed',e)}try{updatePaymentInfo()}catch(e){console.error('KIX payment render failed',e)}"
+new_render = """try{renderCategories()}catch(e){console.error('KIX categories render failed',e);const el=$('#categoryGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض الأقسام: '+String(e&&e.message||e)+'</div>';}try{renderProducts()}catch(e){console.error('KIX products render failed',e);const el=$('#productGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض المنتجات: '+String(e&&e.message||e)+'</div>';}try{renderCart()}catch(e){console.error('KIX cart render failed',e)}try{updatePaymentInfo()}catch(e){console.error('KIX payment render failed',e)}"""
 if old_render in store_js:
     store_js=store_js.replace(old_render,new_render,1)
 else:
