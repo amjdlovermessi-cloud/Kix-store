@@ -22,8 +22,8 @@ load_end = store_js.find('\nfunction renderCategories', load_start)
 if load_start < 0 or load_end < 0:
     raise SystemExit('Could not locate loadData() safely.')
 new_load = """async function loadData(){
-  try{renderCategories();}catch(e){console.error('KIX fallback categories render failed',e);}
-  try{renderProducts();}catch(e){console.error('KIX fallback products render failed',e);}
+  try{renderCategories();}catch(e){console.error('KIX fallback categories render failed',e);const el=$('#categoryGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض الأقسام: '+String(e&&e.message||e)+'</div>';}
+  try{renderProducts();}catch(e){console.error('KIX fallback products render failed',e);const el=$('#productGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض المنتجات: '+String(e&&e.message||e)+'</div>';}
   try{renderCart();updatePaymentInfo();}catch(e){console.warn('KIX initial cart/payment render failed',e);}
   if(!sb){console.warn('KIX Supabase client unavailable; showing fallback catalog.');return;}
   const timed=(query,label)=>Promise.race([Promise.resolve(query),new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+' request timed out')),10000))]);
@@ -32,9 +32,9 @@ new_load = """async function loadData(){
     timed(sb.from('products').select('*').eq('active',true).order('sort_order'),'products'),
     timed(sb.from('site_settings').select('key,value'),'site_settings')
   ]);
-  if(results[0].status==='fulfilled'&&!results[0].value.error&&results[0].value.data?.length){categories=results[0].value.data;try{renderCategories();}catch(e){console.error('KIX categories render failed',e);}}
+  if(results[0].status==='fulfilled'&&!results[0].value.error&&results[0].value.data?.length){categories=results[0].value.data;try{renderCategories();}catch(e){console.error('KIX categories render failed',e);const el=$('#categoryGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض الأقسام: '+String(e&&e.message||e)+'</div>';}}
   else if(results[0].status==='rejected'||results[0].value?.error)console.warn('KIX categories query failed',results[0].reason||results[0].value.error);
-  if(results[1].status==='fulfilled'&&!results[1].value.error&&results[1].value.data){products=results[1].value.data;try{renderProducts();}catch(e){console.error('KIX products render failed',e);}}
+  if(results[1].status==='fulfilled'&&!results[1].value.error&&results[1].value.data){products=results[1].value.data;try{renderProducts();}catch(e){console.error('KIX products render failed',e);const el=$('#productGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض المنتجات: '+String(e&&e.message||e)+'</div>';}}
   else if(results[1].status==='rejected'||results[1].value?.error)console.warn('KIX products query failed',results[1].reason||results[1].value.error);
   if(results[2].status==='fulfilled'&&!results[2].value.error&&results[2].value.data){results[2].value.data.forEach(x=>settings[x.key]=x.value);document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a=>a.href='https://wa.me/'+settings.whatsapp_number);document.querySelectorAll('a[href^="https://t.me/"]').forEach(a=>a.href='https://t.me/'+settings.telegram_username);}
   else if(results[2].status==='rejected'||results[2].value?.error)console.warn('KIX settings query failed',results[2].reason||results[2].value.error);
@@ -43,7 +43,7 @@ new_load = """async function loadData(){
 store_js = store_js[:load_start] + new_load + store_js[load_end:]
 # Render each storefront area independently so one UI exception cannot strand both loaders.
 old_render = 'renderCategories();renderProducts();renderCart();updatePaymentInfo();'
-new_render = "try{renderCategories()}catch(e){console.error('KIX categories render failed',e);const el=$('#categoryGrid');if(el)el.innerHTML='<div class=\"loading\">تعذر عرض الأقسام. حدّث الصفحة وحاول مجدداً.</div>';}try{renderProducts()}catch(e){console.error('KIX products render failed',e);const el=$('#productGrid');if(el)el.innerHTML='<div class=\"loading\">تعذر عرض المنتجات. حدّث الصفحة وحاول مجدداً.</div>';}try{renderCart()}catch(e){console.error('KIX cart render failed',e)}try{updatePaymentInfo()}catch(e){console.error('KIX payment render failed',e)}"
+new_render = "try{renderCategories()}catch(e){console.error('KIX categories render failed',e);const el=$('#categoryGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض الأقسام: '+String(e&&e.message||e)+'</div>';const el=$('#categoryGrid');if(el)el.innerHTML='<div class=\"loading\">تعذر عرض الأقسام. حدّث الصفحة وحاول مجدداً.</div>';}try{renderProducts()}catch(e){console.error('KIX products render failed',e);const el=$('#productGrid');if(el)el.innerHTML='<div class="loading">خطأ عرض المنتجات: '+String(e&&e.message||e)+'</div>';const el=$('#productGrid');if(el)el.innerHTML='<div class=\"loading\">تعذر عرض المنتجات. حدّث الصفحة وحاول مجدداً.</div>';}try{renderCart()}catch(e){console.error('KIX cart render failed',e)}try{updatePaymentInfo()}catch(e){console.error('KIX payment render failed',e)}"
 if old_render in store_js:
     store_js=store_js.replace(old_render,new_render,1)
 else:
@@ -64,6 +64,16 @@ if 'kix-display-currency' not in store_js or 'kix-currency-changed' not in store
     raise SystemExit('Currency patch verification failed: formatter or refresh listener is missing')
 store.write_text(store_js,encoding='utf-8')
 index.write_text(html,encoding='utf-8')
+# Surface uncaught browser errors on the storefront instead of leaving a silent loader.
+index=site/'index.html'
+html=index.read_text(encoding='utf-8')
+if 'id="kixRuntimeDiag"' not in html:
+    diagnostic = """<script id="kixRuntimeDiag">
+(()=>{const show=(kind,detail)=>{let box=document.getElementById('kixRuntimeDiagBox');if(!box){box=document.createElement('div');box.id='kixRuntimeDiagBox';box.style.cssText='position:fixed;z-index:2147483647;left:10px;right:10px;bottom:10px;padding:12px 14px;border:1px solid #ff5267;border-radius:12px;background:#160b10;color:#fff;font:13px/1.6 system-ui;direction:rtl;overflow-wrap:anywhere;box-shadow:0 8px 30px #0009';document.body.appendChild(box);}box.textContent='تشخيص KIX | '+kind+': '+String(detail||'خطأ غير معروف').slice(0,500);};window.addEventListener('error',e=>show('JavaScript',e.message+' ('+e.filename+':'+e.lineno+')'));window.addEventListener('unhandledrejection',e=>show('Promise',e.reason&&e.reason.message||e.reason));setTimeout(()=>{for(const id of ['categoryGrid','productGrid']){const el=document.getElementById(id);if(el&&/جاري التحميل|loading/i.test(el.textContent||'')){show('واجهة العرض','وصل اتصال قاعدة البيانات لكن بقي '+id+' في حالة التحميل. أرسل لقطة لهذه الرسالة.');break;}}},12000);})();
+</script>"""
+    if '</body>' in html:
+        html=html.replace('</body>',diagnostic+'\\n</body>',1)
+        index.write_text(html,encoding='utf-8')
 # Remove only the obsolete hint text. Never remove its parent HTML element:
 # broad parent-tag matching can accidentally delete the mascot or product categories.
 mascot_decor_removed=0
