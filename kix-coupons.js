@@ -40,5 +40,6 @@ window.fetch=function(input,init){
  return originalFetch(input,init);
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-const observer=new MutationObserver(()=>init());observer.observe(document.documentElement,{childList:true,subtree:true});
+// The checkout paymentInstructions container exists in the initial page markup.
+// No global DOM observer is needed to mount the coupon box.
 })();
