@@ -74,7 +74,9 @@ index.write_text(html, encoding="utf-8")
 store_js = site / "store.js"
 if store_js.exists():
     source = store_js.read_text(encoding="utf-8")
-    source, count = re.subn(r'function\s+initMascot\s*\(\)\s*\{.*?\}', 'function initMascot(){}', source, count=1, flags=re.S)
+    mascot_function = "function initMascot(){let b=$('#mascotButton');if(!b)return;b.addEventListener('click',()=>{b.classList.remove('flip');void b.offsetWidth;b.classList.add('flip');setTimeout(()=>b.classList.remove('flip'),1200);});}"
+    count = source.count(mascot_function)
+    source = source.replace(mascot_function, "function initMascot(){}")
     if count != 1:
         raise SystemExit("Could not safely disable mascot click animation in store.js")
     store_js.write_text(source, encoding="utf-8")
