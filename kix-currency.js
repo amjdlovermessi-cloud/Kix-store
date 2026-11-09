@@ -117,7 +117,7 @@
   function start() {
     mountControl();
     renderAll();
-    const observer = new MutationObserver(records => {
+    const handleMutations = records => {
       if (updating) return;
       for (const record of records) {
         if (record.type === 'characterData') processTextNode(record.target);
@@ -125,8 +125,14 @@
           if (added.nodeType === Node.TEXT_NODE || added.nodeType === Node.ELEMENT_NODE) scan(added);
         }
       }
+    };
+    // Prices only change in these areas. Do not watch the entire page.
+    ['#productGrid', '#cartItems', '#checkoutDialog', '#orderSuccess'].forEach(selector => {
+      const target = document.querySelector(selector);
+      if (!target) return;
+      const observer = new MutationObserver(handleMutations);
+      observer.observe(target, {subtree:true, childList:true, characterData:true});
     });
-    observer.observe(document.body, {subtree:true, childList:true, characterData:true});
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true});
