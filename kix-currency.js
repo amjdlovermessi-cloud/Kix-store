@@ -69,13 +69,17 @@
     }
   }
 
+  // Walk only text nodes. Avoid querying every element in a newly rendered
+  // product grid; that full-tree scan was needlessly expensive on mobile.
   function scan(root) {
     if (!root) return;
+    if (root.nodeType === Node.TEXT_NODE) {
+      processTextNode(root);
+      return;
+    }
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     let node;
     while ((node = walker.nextNode())) processTextNode(node);
-    if (root.nodeType === Node.ELEMENT_NODE) processPriceElement(root);
-    if (root.querySelectorAll) root.querySelectorAll('*').forEach(processPriceElement);
   }
 
   function renderAll() {
@@ -114,11 +118,11 @@
     mountControl();
     renderAll();
     const observer = new MutationObserver(records => {
+      if (updating) return;
       for (const record of records) {
         if (record.type === 'characterData') processTextNode(record.target);
         else for (const added of record.addedNodes) {
-          if (added.nodeType === Node.TEXT_NODE) processTextNode(added);
-          else if (added.nodeType === Node.ELEMENT_NODE) scan(added);
+          if (added.nodeType === Node.TEXT_NODE || added.nodeType === Node.ELEMENT_NODE) scan(added);
         }
       }
     });
