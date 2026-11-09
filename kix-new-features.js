@@ -21,11 +21,13 @@ function addShareButton(){
   actions.querySelector('#kixShareLinkInline').onclick=()=>openShare('link');
  };
  install();
- // Cart UI changes are child-list changes. Watching every class/style mutation
- // caused repeated full-page scans while users interacted with the store.
- let queued=false;
- const observer=new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;install()})});
- observer.observe(document.body,{childList:true,subtree:true});
+ // Recheck only when the shopper opens checkout. Avoid a permanent
+ // whole-document observer and repeated full-page scans during browsing.
+ document.addEventListener('click',event=>{
+  if(event.target.closest('#checkoutButton,[data-checkout],.checkout-button')){
+   requestAnimationFrame(install);
+  }
+ },true);
 }
 async function openShare(mode){const cart=cartRead();if(!cart.length){alert('السلة فارغة حالياً. أضف المنتجات أولاً.');return}let products=[];try{products=await getProducts(cart)}catch(e){alert('تعذر تحميل تفاصيل السلة.');return}const byId=new Map(products.map(p=>[String(p.id),p]));const rows=cart.map(x=>({id:x.id,qty:Number(x.qty||1),p:byId.get(String(x.id))})).filter(x=>x.p);if(!rows.length){alert('لم نعثر على المنتجات الموجودة في السلة.');return}
 const url=new URL(location.href);url.search='';url.hash='';url.searchParams.set('sharecart',b64url(JSON.stringify(rows.map(x=>({id:x.id,qty:x.qty})))));
