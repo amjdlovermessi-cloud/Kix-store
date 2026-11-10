@@ -31,6 +31,8 @@ jobs:
         run: |
           mkdir site
           unzip -q Kix-Store-Ready-to-Upload.zip -d site
+          mkdir -p site/assets/iptv
+          cp assets/iptv/*.svg site/assets/iptv/
           python security/patch_checkout.py site
           python security/patch_public_features.py site
           python security/patch_coupons.py site
