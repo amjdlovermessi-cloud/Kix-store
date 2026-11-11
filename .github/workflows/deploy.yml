@@ -40,6 +40,7 @@ jobs:
           python security/patch_new_features.py site
           python security/patch_jrk_supplier.py site
           python security/patch_performance_accessibility.py site
+          python security/patch_gallery_upload.py site
           python - <<'PY'
           from pathlib import Path
           root = Path("site")
