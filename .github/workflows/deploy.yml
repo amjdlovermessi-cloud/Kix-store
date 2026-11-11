@@ -86,6 +86,13 @@ jobs:
             telegram: 'kixstore1'
           };
           EOF
+      - name: Export extracted site for inspection
+        if: steps.archive.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kix-site-inspection
+          path: site
+          retention-days: 1
       - uses: actions/upload-pages-artifact@v3
         if: steps.archive.outputs.exists == 'true'
         with:
