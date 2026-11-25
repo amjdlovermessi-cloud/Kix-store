@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Test brand refresh patch
+        run: python security/test_brand_refresh.py
       - name: Check project archive
         id: archive
         run: |
