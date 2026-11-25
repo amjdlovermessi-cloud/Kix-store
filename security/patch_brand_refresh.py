@@ -20,10 +20,10 @@ for page in pages:
         continue
     if "</head>" not in html:
         continue
-    html = html.replace("</head>", tag + "\\n</head>", 1)
+    html = html.replace("</head>", tag + "\n</head>", 1)
     # Add a consistent mobile browser theme color without disturbing existing metadata.
     if 'name="theme-color"' not in html:
-        html = html.replace("</head>", '<meta name="theme-color" content="#090b10">\\n</head>', 1)
+        html = html.replace("</head>", '<meta name="theme-color" content="#090b10">\n</head>', 1)
     page.write_text(html, encoding="utf-8")
     updated += 1
 
