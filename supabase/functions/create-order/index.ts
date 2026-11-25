@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     // Guest checkout remains available when there is no valid signed-in customer session.
     let customerId: string | null = null;
     const authorization = req.headers.get('authorization') || '';
-    const accessToken = authorization.replace(/^Bearer\\s+/i, '');
+    const accessToken = authorization.replace(/^Bearer\s+/i, '');
     if (accessToken) {
       const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
       if (!authError && authData.user && !authData.user.is_anonymous) {
