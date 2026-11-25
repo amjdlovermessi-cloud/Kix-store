@@ -16,6 +16,8 @@ jobs:
           test -f Kix-Store-Ready-to-Upload.zip
           mkdir site
           unzip -q Kix-Store-Ready-to-Upload.zip -d site
+          unzip -oq security/customer-suite-source.zip -d .
+          python security/patch_customer_suite.py site
       - uses: actions/upload-artifact@v4
         with:
           name: kix-storefront-source
