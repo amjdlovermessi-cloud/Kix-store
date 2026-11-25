@@ -1,0 +1,24 @@
+name: Inspect storefront source for redesign
+on:
+  push:
+    branches: [redesign-foundation]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract storefront archive
+        run: |
+          test -f Kix-Store-Ready-to-Upload.zip
+          mkdir site
+          unzip -q Kix-Store-Ready-to-Upload.zip -d site
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kix-storefront-source
+          path: site/
+          if-no-files-found: error
+          retention-days: 3
