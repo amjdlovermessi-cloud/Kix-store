@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Extract customer feature source
+        run: unzip -oq security/customer-suite-source.zip -d .
       - name: Test brand refresh patch
         run: python security/test_brand_refresh.py
       - name: Check project archive
@@ -43,6 +45,7 @@ jobs:
           python security/patch_jrk_supplier.py site
           python security/patch_performance_accessibility.py site
           python security/patch_brand_refresh.py site
+          python security/patch_customer_suite.py site
           python security/patch_gallery_upload.py site
           python - <<'PY'
           from pathlib import Path
