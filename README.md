@@ -31,3 +31,14 @@ supabase functions deploy create-order --no-verify-jwt
 
 - المتجر: https://amjdlovermessi-cloud.github.io/Kix-store/
 - لوحة الإدارة: https://amjdlovermessi-cloud.github.io/Kix-store/owner.html
+
+
+## Customer experience additions (redesign branch)
+
+- Optional customer accounts using Supabase Auth email/password; browsing and guest checkout remain available.
+- Signed-in customers can view purchase count, purchased units, spend, membership age, and their order history.
+- Daily visit tracking attributes registered visits to the account and keeps guest visits anonymous.
+- Owner-only Top dashboards rank registered visitors, buyers, spenders, and best-selling products.
+- Owner-managed announcement ticker messages, enabled state, and movement speed.
+
+The additive database migration is applied to the connected Supabase project. The storefront UI is added by the GitHub Pages deployment patch and remains isolated on `redesign-foundation` until reviewed and merged.
