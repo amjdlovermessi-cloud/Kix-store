@@ -23,7 +23,7 @@ Deno.serve(async(req)=>{
     const admin=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
     let userId:string|null=null;
     const authorization=req.headers.get('Authorization')||'';
-    const token=authorization.replace(/^Bearer\\s+/i,'');
+    const token=authorization.replace(/^Bearer\s+/i,'');
     if(token){
       const {data,error}=await admin.auth.getUser(token);
       if(!error&&data.user&&!data.user.is_anonymous)userId=data.user.id;
