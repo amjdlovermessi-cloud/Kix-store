@@ -31,8 +31,8 @@ with tempfile.TemporaryDirectory(prefix="kix-brand-test-") as temp:
     home = (site / "index.html").read_text(encoding="utf-8")
     orders = (nested / "index.html").read_text(encoding="utf-8")
 
-    assert 'href="kix-brand-refresh.css?v=20261125-3"' in home
-    assert 'href="../../kix-brand-refresh.css?v=20261125-3"' in orders
+    assert 'href="kix-brand-refresh.css?v=20261125-4"' in home
+    assert 'href="../../kix-brand-refresh.css?v=20261125-4"' in orders
     assert home.count('name="theme-color"') == 1
     assert orders.count('name="theme-color"') == 1
     assert (site / "kix-brand-refresh.css").is_file()
