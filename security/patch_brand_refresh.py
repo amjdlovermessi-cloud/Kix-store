@@ -29,7 +29,7 @@ for page in pages:
         continue
 
     relative_css = Path(os.path.relpath(target, page.parent)).as_posix()
-    tag = f'<link rel="stylesheet" href="{relative_css}?v=20261125-3">'
+    tag = f'<link rel="stylesheet" href="{relative_css}?v=20261125-4">'
     html, count = re.subn(r"</head\s*>", tag + "\n</head>", html, count=1, flags=re.I)
     if count != 1:
         skipped.append(str(page.relative_to(site)))
