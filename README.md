@@ -42,3 +42,8 @@ supabase functions deploy create-order --no-verify-jwt
 - Owner-managed announcement ticker messages, enabled state, and movement speed.
 
 The additive database migration is applied to the connected Supabase project. The storefront UI is added by the GitHub Pages deployment patch and remains isolated on `redesign-foundation` until reviewed and merged.
+
+
+## Storefront publishing
+
+The commerce experience patch is applied after the customer suite during GitHub Pages deployment. Its asset source files live at the repository root.
