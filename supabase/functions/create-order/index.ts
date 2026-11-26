@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
 
   try {
     const contentLength = Number(req.headers.get('content-length') || 0);
-    if (contentLength > 32 * 1024) return json({ error: 'حجم الطلب أكبر من المسموح.' }, 413);
+    if (contentLength > 7 * 1024 * 1024) return json({ error: 'حجم الطلب أكبر من المسموح.' }, 413);
 
     const rawIp = req.headers.get('cf-connecting-ip')
       || req.headers.get('x-real-ip')
@@ -56,6 +56,18 @@ Deno.serve(async (req) => {
     }
     if (allowed !== true) return json({ error: 'وصلت إلى الحد المؤقت للطلبات. انتظر 10 دقائق ثم حاول مجدداً.' }, 429);
 
+    // Optional customer account: only associate an order with a user after validating the bearer token.
+    // Guest checkout remains available when there is no valid signed-in customer session.
+    let customerId: string | null = null;
+    const authorization = req.headers.get('authorization') || '';
+    const accessToken = authorization.replace(/^Bearer\s+/i, '');
+    if (accessToken) {
+      const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+      if (!authError && authData.user && !authData.user.is_anonymous) {
+        customerId = authData.user.id;
+      }
+    }
+
     const body = await req.json();
     // Honeypot field: legitimate storefront clients leave this empty.
     if (String(body.website || '').trim()) return json({ error: 'تعذر تسجيل الطلب.' }, 400);
@@ -73,8 +85,16 @@ Deno.serve(async (req) => {
     if (email.length > 254 || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
       return json({ error: 'البريد الإلكتروني غير صحيح.' }, 400);
     }
-    if (!['asiacell', 'superqi', 'dizly'].includes(payment)) {
+    if (!['asiacell', 'superqi', 'dizly', 'asiacell_card'].includes(payment)) {
       return json({ error: 'طريقة الدفع غير معتمدة.' }, 400);
+    }
+    const receiptMime = String(body.receipt_mime || '');
+    const receiptData = String(body.receipt_data || '');
+    if (payment === 'asiacell_card' && (!receiptData || !['image/jpeg','image/png','image/webp'].includes(receiptMime))) {
+      return json({ error: 'أرفق صورة قسيمة التحويل لإكمال الطلب.' }, 400);
+    }
+    if (receiptData && (receiptData.length > 7 * 1024 * 1024 || !['image/jpeg','image/png','image/webp'].includes(receiptMime))) {
+      return json({ error: 'ملف القسيمة غير صالح أو حجمه أكبر من المسموح.' }, 400);
     }
     if (!items.length || items.length > 30) {
       return json({ error: 'السلة فارغة أو تحتوي على عدد كبير من المنتجات.' }, 400);
@@ -118,11 +138,14 @@ Deno.serve(async (req) => {
       .from('orders')
       .insert({
         order_number: orderNumber,
+        customer_id: customerId,
         customer_name: name,
         phone,
         email,
         notes,
         payment_method: payment,
+        subtotal_iqd: total,
+        discount_iqd: 0,
         total_iqd: total,
         status: 'pending'
       })
@@ -137,6 +160,29 @@ Deno.serve(async (req) => {
     if (iErr) {
       await supabase.from('orders').delete().eq('id', order.id);
       throw iErr;
+    }
+
+    if (receiptData) {
+      const binary = atob(receiptData);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      if (bytes.byteLength > 5 * 1024 * 1024) {
+        await supabase.from('orders').delete().eq('id', order.id);
+        return json({ error: 'حجم صورة القسيمة أكبر من 5 ميغابايت.' }, 400);
+      }
+      const ext = receiptMime === 'image/jpeg' ? 'jpg' : receiptMime === 'image/png' ? 'png' : 'webp';
+      const receiptPath = order.id + '/' + crypto.randomUUID() + '.' + ext;
+      const { error: uploadError } = await supabase.storage.from('payment-receipts').upload(receiptPath, bytes, { contentType: receiptMime, upsert: false });
+      if (uploadError) {
+        await supabase.from('orders').delete().eq('id', order.id);
+        throw uploadError;
+      }
+      const { error: receiptUpdateError } = await supabase.from('orders').update({ payment_receipt_path: receiptPath }).eq('id', order.id);
+      if (receiptUpdateError) {
+        await supabase.storage.from('payment-receipts').remove([receiptPath]);
+        await supabase.from('orders').delete().eq('id', order.id);
+        throw receiptUpdateError;
+      }
     }
 
     return json({ order });

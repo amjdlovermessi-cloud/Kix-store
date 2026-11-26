@@ -1,0 +1,37 @@
+name: Inspect storefront source for redesign
+on:
+  push:
+    branches: [redesign-foundation]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract storefront archive
+        run: |
+          test -f Kix-Store-Ready-to-Upload.zip
+          mkdir site
+          unzip -q Kix-Store-Ready-to-Upload.zip -d site
+          unzip -oq security/customer-suite-source.zip -d .
+          python security/patch_customer_suite.py site
+          python security/patch_commerce_experience.py site
+      - name: Validate storefront enhancements
+        run: |
+          node --check site/kix-commerce-enhancements.js
+          test -f site/guarantee.html
+          test -f site/payment.html
+          test -f site/faq.html
+          test -f site/about.html
+          test -f site/contact.html
+          grep -q 'kix-commerce-enhancements.js' site/index.html
+          grep -q 'kixTrustAndPolicies' site/index.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kix-storefront-source
+          path: site/
+          if-no-files-found: error
+          retention-days: 3
