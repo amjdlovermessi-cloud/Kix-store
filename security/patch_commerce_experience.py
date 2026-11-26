@@ -2,7 +2,7 @@ from pathlib import Path
 import sys
 
 site = Path(sys.argv[1]).resolve()
-root = Path(__file__).resolve().parent
+root = Path(__file__).resolve().parent.parent
 if not (site / "index.html").is_file():
     raise SystemExit("KIX commerce patch: index.html missing")
 
