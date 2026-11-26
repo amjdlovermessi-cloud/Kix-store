@@ -30,7 +30,7 @@ skipped = []
 for page in pages:
     html = page.read_text(encoding="utf-8")
     relative_css = Path(os.path.relpath(target, page.parent)).as_posix()
-    css_tag = f'<link rel="stylesheet" href="{relative_css}?v=20261126-2">'
+    css_tag = f'<link rel="stylesheet" href="{relative_css}?v=20261126-3">'
     if "kix-brand-refresh.css" in html:
         html = re.sub(
             r'<link\b[^>]*href=["\'][^"\']*kix-brand-refresh\.css[^"\']*["\'][^>]*>',
@@ -72,6 +72,39 @@ for page in pages:
         )
     page.write_text(html, encoding="utf-8")
     updated += 1
+
+# Replace the old animated gaming mascot with a static geometric brand composition.
+index = site / "index.html"
+if index.is_file():
+    html = index.read_text(encoding="utf-8")
+    html = html.replace(
+        "<h1>ارتقِ بتجربتك<br><em>إلى المستوى التالي</em></h1>",
+        "<h1>كل عالمك الرقمي<br><em>في مكان واحد</em></h1>",
+    )
+    html = html.replace(
+        "كل ما يحتاجه اللاعب في مكان واحد. ألعاب رقمية، اشتراكات، وبطاقات شحن بتجربة شراء سهلة وواضحة.",
+        "بطاقات رقمية، اشتراكات، ألعاب، وخدمات مختارة. كل ما تحتاجه بتجربة شراء سهلة وواضحة.",
+    )
+    html = html.replace("✦ تجربة تسوق مصممة للاعبين", "✦ اختيارات رقمية واضحة وتجربة أسهل")
+    hero_visual = """<div class="hero-visual" aria-hidden="true">
+        <span class="hero-ring hero-ring-one"></span><span class="hero-ring hero-ring-two"></span>
+        <div class="hero-mark"><img src="assets/kix-symbol.svg" alt=""></div>
+        <span class="hero-chip hero-chip-one">DIGITAL</span>
+        <span class="hero-chip hero-chip-two">GAMES</span>
+        <span class="hero-chip hero-chip-three">SUBSCRIPTIONS</span>
+      </div>"""
+    html, hero_count = re.subn(
+        r'<div class="hero-stage">.*?</section>',
+        hero_visual + "\n    </section>",
+        html,
+        count=1,
+        flags=re.S,
+    )
+    if hero_count:
+        index.write_text(html, encoding="utf-8")
+        print("KIX homepage hero refreshed: animated mascot removed and replaced by geometric brand artwork.")
+    elif 'class="hero-visual"' not in html:
+        raise SystemExit("KIX visual refresh: expected homepage hero markup was not found")
 
 print(f"KIX visual evolution installed. Updated: {updated}; already linked: {already_linked}; skipped: {len(skipped)}.")
 if skipped:
