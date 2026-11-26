@@ -30,7 +30,7 @@ skipped = []
 for page in pages:
     html = page.read_text(encoding="utf-8")
     relative_css = Path(os.path.relpath(target, page.parent)).as_posix()
-    css_tag = f'<link rel="stylesheet" href="{relative_css}?v=20261126-1">'
+    css_tag = f'<link rel="stylesheet" href="{relative_css}?v=20261126-2">'
     if "kix-brand-refresh.css" in html:
         html = re.sub(
             r'<link\b[^>]*href=["\'][^"\']*kix-brand-refresh\.css[^"\']*["\'][^>]*>',
