@@ -33,7 +33,8 @@ function decorateCards(){
 }
 function sortCards(){
  const grid=$('#productGrid');if(!grid||busy)return;
- const cards=$$('.product-card',grid);if(cards.length<2)return;
+ const cards=$('.product-card',grid);if(cards.length<2)return;
+ const original=cards.slice();
  const collator=new Intl.Collator('ar',{numeric:true,sensitivity:'base'});
  cards.sort((a,b)=>{
   if(sortMode==='price-asc')return priceOf(a)-priceOf(b);
@@ -41,6 +42,7 @@ function sortCards(){
   if(sortMode==='name-asc')return collator.compare($('h3',a)?.textContent||'',$('h3',b)?.textContent||'');
   return 0;
  });
+ if(cards.every((card,index)=>card===original[index]))return;
  busy=true;cards.forEach(c=>grid.append(c));requestAnimationFrame(()=>{busy=false});
 }
 function schedule(){
