@@ -107,6 +107,9 @@ jobs:
         if: steps.archive.outputs.exists == 'true'
         with:
           path: site
+      - name: Wait for Pages artifact indexing
+        if: steps.archive.outputs.exists == 'true'
+        run: sleep 15
       - id: deployment
         uses: actions/deploy-pages@v4
         if: steps.archive.outputs.exists == 'true'
