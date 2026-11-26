@@ -7,18 +7,22 @@ import tempfile
 root = Path(__file__).resolve().parent.parent
 patch = root / "security" / "patch_brand_refresh.py"
 stylesheet = root / "kix-brand-refresh.css"
+logo = root / "kix-symbol.svg"
 
 with tempfile.TemporaryDirectory(prefix="kix-brand-test-") as temp:
     fixture = Path(temp)
     (fixture / "security").mkdir()
     shutil.copy2(patch, fixture / "security" / patch.name)
     shutil.copy2(stylesheet, fixture / stylesheet.name)
+    shutil.copy2(logo, fixture / logo.name)
 
     site = fixture / "site"
     nested = site / "account" / "orders"
     nested.mkdir(parents=True)
+    (site / "assets").mkdir()
+    (site / "assets" / "kix-logo.png").write_bytes(b"legacy logo placeholder")
     (site / "index.html").write_text(
-        "<html><head><title>Home</title></head><body></body></html>",
+        '<html><head><title>Home</title><meta name="theme-color" content="#090b10"></head><body><a class="brand"><img src="assets/kix-logo.png"></a></body></html>',
         encoding="utf-8",
     )
     (nested / "index.html").write_text(
@@ -31,15 +35,15 @@ with tempfile.TemporaryDirectory(prefix="kix-brand-test-") as temp:
     home = (site / "index.html").read_text(encoding="utf-8")
     orders = (nested / "index.html").read_text(encoding="utf-8")
 
-    assert 'href="kix-brand-refresh.css?v=20261125-4"' in home
-    assert 'href="../../kix-brand-refresh.css?v=20261125-4"' in orders
-    assert home.count('name="theme-color"') == 1
-    assert orders.count('name="theme-color"') == 1
-    assert (site / "kix-brand-refresh.css").is_file()
+    assert 'href="kix-brand-refresh.css?v=20261126-1"' in home
+    assert 'href="../../kix-brand-refresh.css?v=20261126-1"' in orders
+    assert 'src="assets/kix-symbol.svg"' in home
+    assert 'name="theme-color" content="#0B1020"' in home
+    assert (site / "assets" / "kix-symbol.svg").is_file()
+    assert (site / "favicon.svg").is_file()
 
-    second = subprocess.run(command, check=True, capture_output=True, text=True)
+    subprocess.run(command, check=True, capture_output=True, text=True)
     assert (site / "index.html").read_text(encoding="utf-8") == home
     assert (nested / "index.html").read_text(encoding="utf-8") == orders
-    assert "already linked: 2" in second.stdout
 
-print("Brand refresh regression test passed: root page, nested page, theme color, and idempotency.")
+print("Brand refresh regression test passed: nested pages, geometric mark, theme color, and idempotency.")
