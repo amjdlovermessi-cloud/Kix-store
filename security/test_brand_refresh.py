@@ -35,8 +35,8 @@ with tempfile.TemporaryDirectory(prefix="kix-brand-test-") as temp:
     home = (site / "index.html").read_text(encoding="utf-8")
     orders = (nested / "index.html").read_text(encoding="utf-8")
 
-    assert 'href="kix-brand-refresh.css?v=20261126-1"' in home
-    assert 'href="../../kix-brand-refresh.css?v=20261126-1"' in orders
+    assert 'href="kix-brand-refresh.css?v=20261126-2"' in home
+    assert 'href="../../kix-brand-refresh.css?v=20261126-2"' in orders
     assert 'src="assets/kix-symbol.svg"' in home
     assert 'name="theme-color" content="#0B1020"' in home
     assert (site / "assets" / "kix-symbol.svg").is_file()
