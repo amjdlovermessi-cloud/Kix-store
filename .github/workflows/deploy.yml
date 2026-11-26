@@ -46,6 +46,7 @@ jobs:
           python security/patch_performance_accessibility.py site
           python security/patch_brand_refresh.py site
           python security/patch_customer_suite.py site
+          python security/patch_commerce_experience.py site
           python security/patch_gallery_upload.py site
           python - <<'PY'
           from pathlib import Path
@@ -93,6 +94,15 @@ jobs:
             telegram: 'kixstore1'
           };
           EOF
+      - name: Validate storefront output
+        if: steps.archive.outputs.exists == 'true'
+        run: |
+          node --check site/kix-commerce-enhancements.js
+          test -f site/guarantee.html
+          test -f site/payment.html
+          test -f site/faq.html
+          test -f site/about.html
+          test -f site/contact.html
       - uses: actions/upload-pages-artifact@v3
         if: steps.archive.outputs.exists == 'true'
         with:
