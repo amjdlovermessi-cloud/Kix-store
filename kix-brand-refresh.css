@@ -239,3 +239,15 @@ img{max-width:100%}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Geometric brand mark: shared by header, footer, and compact brand locks. */
+.brand,.site-brand,.site-logo,.logo-container,.navbar-brand,.header-logo{
+  display:inline-flex;align-items:center;gap:10px;
+}
+.brand::before,.site-brand::before,.site-logo::before,.logo-container::before,
+.navbar-brand::before,.header-logo::before{
+  content:"";display:block;flex:0 0 42px;width:42px;height:42px;
+  background:url("assets/kix-symbol.svg") center/contain no-repeat;
+}
+.brand img,.site-brand img,.site-logo img,.logo-container img,
+.navbar-brand img,.header-logo img{display:none!important}
