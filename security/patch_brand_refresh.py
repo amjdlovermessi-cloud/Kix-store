@@ -22,7 +22,6 @@ assets = site / "assets"
 assets.mkdir(parents=True, exist_ok=True)
 logo_target = assets / "kix-symbol.svg"
 logo_target.write_bytes(logo_source.read_bytes())
-# Use the new geometric mark as the browser/app icon too.
 (site / "favicon.svg").write_bytes(logo_source.read_bytes())
 
 updated = 0
@@ -34,7 +33,7 @@ for page in pages:
     css_tag = f'<link rel="stylesheet" href="{relative_css}?v=20261126-1">'
     if "kix-brand-refresh.css" in html:
         html = re.sub(
-            r'<link\\b[^>]*href=["\'][^"\']*kix-brand-refresh\\.css[^"\']*["\'][^>]*>',
+            r'<link\b[^>]*href=["\'][^"\']*kix-brand-refresh\.css[^"\']*["\'][^>]*>',
             css_tag,
             html,
             count=1,
@@ -42,32 +41,31 @@ for page in pages:
         )
         already_linked += 1
     else:
-        if not re.search(r"</head\\s*>", html, flags=re.I):
+        if not re.search(r"</head\s*>", html, flags=re.I):
             skipped.append(str(page.relative_to(site)))
             continue
-        html = re.sub(r"</head\\s*>", css_tag + "\\n</head>", html, count=1, flags=re.I)
+        html = re.sub(r"</head\s*>", css_tag + "\n</head>", html, count=1, flags=re.I)
 
-    # Replace the legacy raster mark where its explicit KIX asset path is used.
     relative_logo = Path(os.path.relpath(logo_target, page.parent)).as_posix()
     html = re.sub(
-        r'(?P<before>src=["\'])(?:\\./)?assets/kix-logo\\.png(?P<after>["\'])',
+        r'(?P<before>src=["\'])(?:\./)?assets/kix-logo\.png(?P<after>["\'])',
         lambda m: m.group("before") + relative_logo + m.group("after"),
         html,
         flags=re.I,
     )
 
-    if re.search(r'<meta\\s+name=["\']theme-color["\']', html, flags=re.I):
+    if re.search(r'<meta\s+name=["\']theme-color["\']', html, flags=re.I):
         html = re.sub(
-            r'(<meta\\s+name=["\']theme-color["\']\\s+content=["\'])[^"\']*(["\'][^>]*>)',
-            r'\\g<1>#0B1020\\g<2>',
+            r'(<meta\s+name=["\']theme-color["\']\s+content=["\'])[^"\']*(["\'][^>]*>)',
+            r'\g<1>#0B1020\g<2>',
             html,
             count=1,
             flags=re.I,
         )
     else:
         html = re.sub(
-            r"</head\\s*>",
-            '<meta name="theme-color" content="#0B1020">\\n</head>',
+            r"</head\s*>",
+            '<meta name="theme-color" content="#0B1020">\n</head>',
             html,
             count=1,
             flags=re.I,
