@@ -8,6 +8,7 @@ root = Path(__file__).resolve().parent.parent
 patch = root / "security" / "patch_brand_refresh.py"
 stylesheet = root / "kix-brand-refresh.css"
 logo = root / "kix-symbol.svg"
+logo_image = root / "kix-logo.webp"
 
 with tempfile.TemporaryDirectory(prefix="kix-brand-test-") as temp:
     fixture = Path(temp)
@@ -15,6 +16,7 @@ with tempfile.TemporaryDirectory(prefix="kix-brand-test-") as temp:
     shutil.copy2(patch, fixture / "security" / patch.name)
     shutil.copy2(stylesheet, fixture / stylesheet.name)
     shutil.copy2(logo, fixture / logo.name)
+    shutil.copy2(logo_image, fixture / logo_image.name)
 
     site = fixture / "site"
     nested = site / "account" / "orders"
@@ -35,14 +37,15 @@ with tempfile.TemporaryDirectory(prefix="kix-brand-test-") as temp:
     home = (site / "index.html").read_text(encoding="utf-8")
     orders = (nested / "index.html").read_text(encoding="utf-8")
 
-    assert 'href="kix-brand-refresh.css?v=20261126-3"' in home
+    assert 'href="kix-brand-refresh.css?v=20261127-1"' in home
     assert 'href="../../kix-brand-refresh.css?v=20261126-3"' in orders
-    assert 'src="assets/kix-symbol.svg"' in home
+    assert 'src="assets/kix-logo.webp"' in home
     assert 'name="theme-color" content="#0B1020"' in home
     assert 'class="hero-visual"' in home
     assert "mascot-button" not in home
     assert "كل عالمك الرقمي" in home
     assert (site / "assets" / "kix-symbol.svg").is_file()
+    assert (site / "assets" / "kix-logo.webp").is_file()
     assert (site / "favicon.svg").is_file()
 
     subprocess.run(command, check=True, capture_output=True, text=True)
