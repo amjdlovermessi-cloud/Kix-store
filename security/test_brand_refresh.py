@@ -37,8 +37,8 @@ with tempfile.TemporaryDirectory(prefix="kix-brand-test-") as temp:
     home = (site / "index.html").read_text(encoding="utf-8")
     orders = (nested / "index.html").read_text(encoding="utf-8")
 
-    assert 'href="kix-brand-refresh.css?v=20261127-1"' in home
-    assert 'href="../../kix-brand-refresh.css?v=20261127-1"' in orders
+    assert 'href="kix-brand-refresh.css?v=20261127-2"' in home
+    assert 'href="../../kix-brand-refresh.css?v=20261127-2"' in orders
     assert 'src="assets/kix-logo.webp"' in home
     assert 'name="theme-color" content="#0B1020"' in home
     assert 'class="hero-visual"' in home
@@ -47,6 +47,8 @@ with tempfile.TemporaryDirectory(prefix="kix-brand-test-") as temp:
     assert (site / "assets" / "kix-symbol.svg").is_file()
     assert (site / "assets" / "kix-logo.webp").is_file()
     assert (site / "favicon.svg").is_file()
+    assert "@media(max-width:700px)" in stylesheet.read_text(encoding="utf-8")
+    assert "overflow-wrap:anywhere" in stylesheet.read_text(encoding="utf-8")
 
     subprocess.run(command, check=True, capture_output=True, text=True)
     assert (site / "index.html").read_text(encoding="utf-8") == home
