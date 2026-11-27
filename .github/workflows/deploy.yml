@@ -19,6 +19,8 @@ jobs:
         run: unzip -oq security/customer-suite-source.zip -d .
       - name: Test brand refresh patch
         run: python security/test_brand_refresh.py
+      - name: Test marketplace refinement patch
+        run: python security/test_marketplace_refinement.py
       - name: Check project archive
         id: archive
         run: |
@@ -45,6 +47,7 @@ jobs:
           python security/patch_jrk_supplier.py site
           python security/patch_performance_accessibility.py site
           python security/patch_brand_refresh.py site
+          python security/patch_marketplace_refinement.py site
           python security/patch_customer_suite.py site
           python security/patch_commerce_experience.py site
           python security/patch_gallery_upload.py site
