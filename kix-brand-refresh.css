@@ -468,3 +468,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .category-card{min-height:126px}
   .footer-inner{align-items:flex-start}
 }
+
+/* Restored original KIX crown logo, recolored artwork. */
+.brand::before,.site-brand::before,.site-logo::before,.logo-container::before,
+.navbar-brand::before,.header-logo::before{
+  content:""!important;display:block!important;flex:0 0 48px!important;
+  width:48px!important;height:48px!important;
+  background:url("assets/kix-logo.webp") center/contain no-repeat!important;
+}
+.hero-mark img{width:138px!important;height:138px!important;object-fit:contain!important;transform:none!important;filter:drop-shadow(0 10px 22px rgba(56,189,248,.2))!important}
+@media(max-width:600px){
+  .brand::before,.site-brand::before,.site-logo::before,.logo-container::before,
+  .navbar-brand::before,.header-logo::before{flex-basis:40px!important;width:40px!important;height:40px!important}
+  .hero-mark img{width:112px!important;height:112px!important}
+}
