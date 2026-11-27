@@ -12,10 +12,11 @@ with tempfile.TemporaryDirectory(prefix="kix-market-test-") as tmp:
     (site / "kix-marketplace-refinement.css").write_text(stylesheet.read_text(encoding="utf-8"), encoding="utf-8")
     subprocess.run([sys.executable, str(patch), str(site)], check=True, capture_output=True, text=True)
     html = (site / "index.html").read_text(encoding="utf-8")
-    assert "marketplace-board" in html and "AI & SMART TOOLS" in html
-    assert "LEARNING & KNOWLEDGE" in html
+    assert "marketplace-board" in html
+    assert "marketplace-board-list" not in html
+    assert "الألعاب والبطاقات" not in html
     assert "assets/kix-mascot-3d.png" in html
-    assert "kix-marketplace-refinement.css?v=20261127-2" in html
+    assert "kix-marketplace-refinement.css?v=20261127-3" in html
     assert "وجهتك لكل ما هو رقمي" in html
     assert "اكتشف ما يناسبك" in html
     assert "rgba(255,55,75" not in html
