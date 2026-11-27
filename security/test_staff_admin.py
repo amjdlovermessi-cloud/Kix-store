@@ -10,9 +10,10 @@ patch=root/"security"/"patch_staff_admin.py"
 with tempfile.TemporaryDirectory(prefix="kix-staff-test-") as tmp:
     site=Path(tmp)
     with zipfile.ZipFile(archive) as z:
-        for name in ("admin.js","owner.html","kix-brand-refresh.css"):
+        for name in ("admin.js","owner.html"):
             target=site/name
             target.write_bytes(z.read(name))
+    (site/"kix-brand-refresh.css").write_text((root/"kix-brand-refresh.css").read_text(encoding="utf-8"),encoding="utf-8")
     subprocess.run([sys.executable,str(patch),str(site)],check=True,capture_output=True,text=True)
     admin=(site/"admin.js").read_text(encoding="utf-8")
     owner=(site/"owner.html").read_text(encoding="utf-8")
