@@ -2,6 +2,8 @@ from pathlib import Path
 import re
 
 root=Path("site")
+staff_source=Path("kix-admin-staff.js")
+(root/"kix-admin-staff.js").write_text(staff_source.read_text(encoding="utf-8"),encoding="utf-8")
 admin=root/"admin.js"
 src=admin.read_text(encoding="utf-8")
 src=src.replace("let cats=[],products=[];","let cats=[],products=[],permissions={manage_products:false,edit_prices:false,manage_orders:false},isOwner=false;")
