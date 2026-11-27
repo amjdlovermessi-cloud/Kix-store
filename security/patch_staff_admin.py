@@ -14,11 +14,12 @@ enter="""async function enter(){let {data:{user}}=await sb.auth.getUser();let {d
 function applyStaffUI(){const show=(tab,yes)=>{const b=document.querySelector('.admin-tabs [data-tab="'+tab+'"]');if(b)b.hidden=!yes;const pane=document.getElementById('pane-'+tab);if(pane)pane.hidden=!yes;};show('products',permissions.manage_products||permissions.edit_prices);show('categories',permissions.manage_products);show('orders',permissions.manage_orders);show('settings',isOwner);const add=$('#addProduct');if(add)add.hidden=!permissions.manage_products;const cat=$('#addCategory');if(cat)cat.hidden=!permissions.manage_products;}
 async function loadProducts"""
 src=src[:m.start()]+enter+src[m.end():]
-src=src.replace('<div class="row-actions"><button data-edit-product="\${p.id}">تعديل</button><button class="danger" data-delete-product="\${p.id}">حذف</button></div>','<div class="row-actions">\${permissions.manage_products?\\'<button data-edit-product="\\'+p.id+\\'">تعديل</button><button class="danger" data-delete-product="\\'+p.id+\\'">حذف</button>\\':permissions.edit_prices?\\'<button data-edit-price="\\'+p.id+\\'">تعديل السعر</button>\\':\\'\\'}</div>')
+helper="""function applyProductPermissionButtons(){const host=$('#adminProducts');if(!host)return;host.querySelectorAll('[data-edit-product]').forEach(edit=>{const row=edit.closest('.admin-row'),del=row?.querySelector('[data-delete-product]');if(permissions.manage_products){edit.hidden=false;if(del)del.hidden=false;return;}edit.hidden=true;if(del)del.hidden=true;if(!permissions.edit_prices||row.querySelector('[data-edit-price-only]'))return;const b=document.createElement('button');b.type='button';b.dataset.editPriceOnly=edit.dataset.editProduct;b.textContent='تعديل السعر';row.querySelector('.row-actions')?.append(b);b.onclick=async()=>{const p=products.find(x=>x.id===b.dataset.editPriceOnly);if(!p)return;const raw=prompt('السعر الجديد بالدينار العراقي:',String(p.price_iqd));if(raw===null)return;const price=Number(String(raw).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^0-9]/g,''));if(!Number.isSafeInteger(price)||price<0)return toast('أدخل سعراً صحيحاً.');const {error}=await sb.from('products').update({price_iqd:price}).eq('id',p.id);if(error)return toast(error.message);toast('تم تحديث السعر');loadProducts();};});}
+"""
+src=src.replace("async function loadProducts",helper+"async function loadProducts",1)
 needle="$('#adminProducts').querySelectorAll('[data-delete-product]').forEach(b=>b.onclick=()=>deleteProduct(b.dataset.deleteProduct));}"
-replacement="""$('#adminProducts').querySelectorAll('[data-delete-product]').forEach(b=>b.onclick=()=>deleteProduct(b.dataset.deleteProduct));$('#adminProducts').querySelectorAll('[data-edit-price]').forEach(b=>b.onclick=async()=>{let p=products.find(x=>x.id===b.dataset.editPrice);if(!p)return;let raw=prompt('السعر الجديد بالدينار العراقي:',String(p.price_iqd));if(raw===null)return;let price=Number(String(raw).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^0-9]/g,''));if(!Number.isSafeInteger(price)||price<0)return toast('أدخل سعراً صحيحاً.');let {error}=await sb.from('products').update({price_iqd:price}).eq('id',p.id);if(error)return toast(error.message);toast('تم تحديث السعر');loadProducts();});}"""
 if needle not in src: raise SystemExit("product handlers not found")
-src=src.replace(needle,replacement,1)
+src=src.replace(needle,needle[:-1]+"applyProductPermissionButtons();}",1)
 src=src.replace("$('#addProduct').onclick=()=>{","$('#addProduct').onclick=()=>{if(!permissions.manage_products)return;")
 src=src.replace("$('#addCategory').onclick=()=>{","$('#addCategory').onclick=()=>{if(!permissions.manage_products)return;")
 src=src.replace("$('#settingsForm').onsubmit=saveSettings;","$('#settingsForm').onsubmit=e=>{if(!isOwner){e.preventDefault();return;}saveSettings(e);};")
@@ -28,6 +29,9 @@ html=owner.read_text(encoding="utf-8")
 if "kix-admin-staff.js" not in html:
  html=html.replace('<script src="admin.js" defer></script>','<script src="admin.js" defer></script><script src="kix-admin-staff.js?v=20261127-1" defer></script>')
 owner.write_text(html,encoding="utf-8")
+for page in root.rglob("*.html"):
+ page_text=page.read_text(encoding="utf-8")
+ page.write_text(page_text.replace("kix-brand-refresh.css?v=20261127-2","kix-brand-refresh.css?v=20261127-3"),encoding="utf-8")
 cssfile=root/"kix-brand-refresh.css"
 css=cssfile.read_text(encoding="utf-8")
 css+="""
