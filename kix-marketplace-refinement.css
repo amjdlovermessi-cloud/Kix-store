@@ -80,3 +80,42 @@ body{background-color:var(--market-ink)!important}
 .kix-instagram-footer svg,.kix-instagram-footer img,.kix-social-footer svg,.kix-social-footer img{display:inline-block!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;max-width:28px!important;max-height:28px!important;object-fit:contain!important;flex:0 0 28px!important}
 .kix-instagram-footer a,.kix-social-footer a{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;width:auto!important;max-width:100%!important;height:auto!important;min-height:42px!important;padding:8px 13px!important;flex:0 1 auto!important}
 .kix-instagram-footer a svg,.kix-instagram-footer a img,.kix-social-footer a svg,.kix-social-footer a img{width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;max-width:22px!important;max-height:22px!important;flex-basis:22px!important}
+
+/* KIX mascot returns as a static hero character, recolored for the new palette. */
+.marketplace-board-feature{min-height:172px!important;overflow:hidden}
+.marketplace-orbit-art.mascot-art{width:150px!important;height:166px!important;flex:0 0 150px!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:visible!important}
+.marketplace-orbit-art.mascot-art:before,.marketplace-orbit-art.mascot-art:after{display:none!important}
+.marketplace-orbit-art.mascot-art img{display:block;width:100%;height:100%;object-fit:contain;filter:hue-rotate(150deg) saturate(.92) drop-shadow(0 8px 18px rgba(56,189,248,.2));}
+@media(max-width:640px){
+ .marketplace-board-feature{min-height:145px!important}
+ .marketplace-orbit-art.mascot-art{width:112px!important;height:138px!important;flex-basis:112px!important;transform:none!important}
+}
+@media(max-width:370px){
+ .marketplace-feature-copy strong{font-size:16px!important}
+ .marketplace-orbit-art.mascot-art{width:92px!important;height:122px!important;flex-basis:92px!important}
+}
+
+/* Product detail: prevent long URLs, descriptions and fact values from widening the mobile card. */
+.kix-detail-main,.kix-detail-card,.kix-detail-image,.kix-detail-info,
+.kix-detail-facts,.kix-detail-facts>div,.kix-detail-description,
+.kix-quantity-box,.kix-quantity-total{min-width:0!important;max-width:100%!important}
+.kix-detail-card{width:100%!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+.kix-detail-info{overflow-wrap:anywhere;word-break:normal}
+.kix-detail-description,.kix-detail-facts span,.kix-detail-facts a{
+ overflow-wrap:anywhere!important;word-break:break-word!important;white-space:pre-wrap;
+}
+.kix-detail-facts>div{grid-template-columns:minmax(68px,88px) minmax(0,1fr)!important}
+.kix-detail-image img{display:block;max-width:100%!important;min-width:0!important;object-fit:contain!important}
+@media(max-width:700px){
+ .kix-detail-main{width:calc(100% - 24px)!important;max-width:100%!important;padding-inline:0!important}
+ .kix-detail-card{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important;padding:12px!important}
+ .kix-detail-image{width:100%!important;min-width:0!important;min-height:0!important;height:clamp(180px,58vw,270px)!important}
+ .kix-detail-image img{width:100%!important;height:100%!important;max-height:100%!important;object-fit:contain!important}
+ .kix-detail-info{width:100%!important;min-width:0!important}
+ .kix-detail-info h1{font-size:21px!important;overflow-wrap:anywhere}
+ .kix-detail-description{font-size:13px!important;line-height:1.9!important}
+ .kix-detail-facts>div{grid-template-columns:74px minmax(0,1fr)!important;gap:8px!important;padding:10px!important}
+ .kix-quantity-box{width:100%!important;display:flex!important;flex-wrap:wrap!important}
+ .kix-quantity-total{gap:8px;flex-wrap:wrap}
+ .kix-detail-body{overflow-x:hidden!important}
+}
