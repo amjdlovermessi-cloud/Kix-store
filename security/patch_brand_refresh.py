@@ -11,10 +11,13 @@ if not pages:
 repo_root = Path(__file__).resolve().parent.parent
 source = repo_root / "kix-brand-refresh.css"
 logo_source = repo_root / "kix-symbol.svg"
+logo_image_source = repo_root / "kix-logo.webp"
 if not source.is_file():
     raise SystemExit(f"Missing visual foundation stylesheet: {source}")
 if not logo_source.is_file():
-    raise SystemExit(f"Missing geometric logo asset: {logo_source}")
+    raise SystemExit(f"Missing legacy symbol asset: {logo_source}")
+if not logo_image_source.is_file():
+    raise SystemExit(f"Missing KIX logo artwork: {logo_image_source}")
 
 target = site / "kix-brand-refresh.css"
 target.write_bytes(source.read_bytes())
@@ -22,6 +25,8 @@ assets = site / "assets"
 assets.mkdir(parents=True, exist_ok=True)
 logo_target = assets / "kix-symbol.svg"
 logo_target.write_bytes(logo_source.read_bytes())
+logo_image_target = assets / "kix-logo.webp"
+logo_image_target.write_bytes(logo_image_source.read_bytes())
 (site / "favicon.svg").write_bytes(logo_source.read_bytes())
 
 updated = 0
@@ -73,7 +78,7 @@ for page in pages:
     page.write_text(html, encoding="utf-8")
     updated += 1
 
-# Replace the old animated gaming mascot with a static geometric brand composition.
+# Use the restored KIX crown emblem artwork as the hero brand mark.
 index = site / "index.html"
 if index.is_file():
     html = index.read_text(encoding="utf-8")
@@ -88,7 +93,7 @@ if index.is_file():
     html = html.replace("✦ تجربة تسوق مصممة للاعبين", "✦ اختيارات رقمية واضحة وتجربة أسهل")
     hero_visual = """<div class="hero-visual" aria-hidden="true">
         <span class="hero-ring hero-ring-one"></span><span class="hero-ring hero-ring-two"></span>
-        <div class="hero-mark"><img src="assets/kix-symbol.svg" alt=""></div>
+        <div class="hero-mark"><img src="assets/kix-logo.webp" alt="KIX Store"></div>
         <span class="hero-chip hero-chip-one">DIGITAL</span>
         <span class="hero-chip hero-chip-two">GAMES</span>
         <span class="hero-chip hero-chip-three">SUBSCRIPTIONS</span>
@@ -102,7 +107,7 @@ if index.is_file():
     )
     if hero_count:
         index.write_text(html, encoding="utf-8")
-        print("KIX homepage hero refreshed: animated mascot removed and replaced by geometric brand artwork.")
+        print("KIX homepage hero refreshed with the restored crown logo artwork.")
     elif 'class="hero-visual"' not in html:
         raise SystemExit("KIX visual refresh: expected homepage hero markup was not found")
 
