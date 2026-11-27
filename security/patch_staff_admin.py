@@ -1,7 +1,8 @@
 from pathlib import Path
 import re
+import sys
 
-root=Path("site")
+root=Path(sys.argv[1] if len(sys.argv)>1 else "site")
 staff_source=Path("kix-admin-staff.js")
 (root/"kix-admin-staff.js").write_text(staff_source.read_text(encoding="utf-8"),encoding="utf-8")
 admin=root/"admin.js"
