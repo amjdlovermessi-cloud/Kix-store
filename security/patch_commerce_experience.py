@@ -14,8 +14,8 @@ for name in ("kix-commerce-enhancements.js", "kix-commerce-enhancements.css"):
 
 index = site / "index.html"
 html = index.read_text(encoding="utf-8")
-css_tag = '<link rel="stylesheet" href="kix-commerce-enhancements.css?v=20261126-1">'
-js_tag = '<script src="kix-commerce-enhancements.js?v=20261126-1" defer></script>'
+css_tag = '<link rel="stylesheet" href="kix-commerce-enhancements.css?v=20261127-2">'
+js_tag = '<script src="kix-commerce-enhancements.js?v=20261127-2" defer></script>'
 if "kix-commerce-enhancements.css" not in html:
     html = html.replace("</head>", css_tag + "\n</head>", 1)
 if "kix-commerce-enhancements.js" not in html:
