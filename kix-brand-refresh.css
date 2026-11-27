@@ -482,3 +482,29 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .navbar-brand::before,.header-logo::before{flex-basis:40px!important;width:40px!important;height:40px!important}
   .hero-mark img{width:112px!important;height:112px!important}
 }
+
+/* Responsive product detail card: contain media and wrap long supplier copy/URLs. */
+.kix-detail-main,.kix-detail-card,.kix-detail-image,.kix-detail-info,.kix-detail-facts,
+.kix-detail-facts>div,.kix-detail-description,.kix-quantity-box,.kix-quantity-total{
+ min-width:0!important;max-width:100%!important
+}
+.kix-detail-card{width:100%!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+.kix-detail-info{overflow-wrap:anywhere}
+.kix-detail-description,.kix-detail-facts span,.kix-detail-facts a{
+ overflow-wrap:anywhere!important;word-break:break-word!important
+}
+.kix-detail-facts>div{grid-template-columns:minmax(68px,88px) minmax(0,1fr)!important}
+.kix-detail-image img{display:block;max-width:100%!important;min-width:0!important;object-fit:contain!important}
+@media(max-width:700px){
+ .kix-detail-main{width:calc(100% - 24px)!important;max-width:100%!important;padding-inline:0!important}
+ .kix-detail-card{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:14px!important;padding:12px!important}
+ .kix-detail-image{width:100%!important;min-width:0!important;min-height:0!important;height:clamp(180px,58vw,270px)!important}
+ .kix-detail-image img{width:100%!important;height:100%!important;max-height:100%!important;object-fit:contain!important}
+ .kix-detail-info{width:100%!important;min-width:0!important}
+ .kix-detail-info h1{font-size:21px!important;overflow-wrap:anywhere}
+ .kix-detail-description{font-size:13px!important;line-height:1.9!important;white-space:pre-wrap;overflow-wrap:anywhere!important}
+ .kix-detail-facts>div{grid-template-columns:74px minmax(0,1fr)!important;gap:8px!important;padding:10px!important}
+ .kix-quantity-box{width:100%!important;display:flex!important;flex-wrap:wrap!important}
+ .kix-quantity-total{gap:8px;flex-wrap:wrap}
+ .kix-detail-body{overflow-x:hidden!important}
+}
