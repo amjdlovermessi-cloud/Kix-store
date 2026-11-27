@@ -18,7 +18,7 @@ with tempfile.TemporaryDirectory(prefix="kix-staff-test-") as tmp:
     owner=(site/"owner.html").read_text(encoding="utf-8")
     css=(site/"kix-brand-refresh.css").read_text(encoding="utf-8")
     assert "store_staff" in admin
-    assert "data-edit-price" in admin
+    assert "data-edit-price-only" in admin
     assert "applyStaffUI" in admin
     assert "kix-admin-staff.js" in owner
     assert (site/"kix-admin-staff.js").is_file()
