@@ -74,3 +74,9 @@ body{background-color:var(--market-ink)!important}
 .steps{gap:9px}.steps article{padding:13px!important}.steps h3{font-size:13px!important}.steps p{font-size:10px}.kix-stat-grid{gap:8px}
 }
 @media(max-width:370px){.marketplace-index{display:none}.marketplace-board-list>div{grid-template-columns:29px minmax(0,1fr) 14px}.marketplace-glyph{grid-column:1;grid-row:1}.marketplace-label{grid-column:2;grid-row:1}.marketplace-board-list>div>b{grid-column:3;grid-row:1}}
+
+/* Fix oversized social-platform marks in the footer. */
+.kix-instagram-footer,.kix-social-footer{display:flex!important;align-items:center!important;justify-content:center!important;gap:12px!important;min-height:0!important;height:auto!important;max-height:none!important;overflow:hidden!important}
+.kix-instagram-footer svg,.kix-instagram-footer img,.kix-social-footer svg,.kix-social-footer img{display:inline-block!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;max-width:28px!important;max-height:28px!important;object-fit:contain!important;flex:0 0 28px!important}
+.kix-instagram-footer a,.kix-social-footer a{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;width:auto!important;max-width:100%!important;height:auto!important;min-height:42px!important;padding:8px 13px!important;flex:0 1 auto!important}
+.kix-instagram-footer a svg,.kix-instagram-footer a img,.kix-social-footer a svg,.kix-social-footer a img{width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;max-width:22px!important;max-height:22px!important;flex-basis:22px!important}
