@@ -30,13 +30,6 @@ html = html.replace('اختَر منتجك وأضفه إلى السلة.', 'من
 board = """<div class="hero-visual marketplace-board" aria-label="مجالات المتجر الرقمية">
         <div class="marketplace-board-head"><span>YOUR DIGITAL WORLD</span><b>01 / 05</b></div>
         <div class="marketplace-board-feature"><div class="marketplace-feature-copy"><small>DISCOVER MORE</small><strong>مساحة واحدة<br>لاحتمالات أكثر</strong><span>اختَر. استمتع. أنجز.</span></div><div class="marketplace-orbit-art mascot-art" aria-hidden="true"><img src="assets/kix-mascot-3d.png" alt=""></div></div>
-        <div class="marketplace-board-list">
-          <div><span class="marketplace-index">01</span><span class="marketplace-glyph">G</span><span class="marketplace-label"><strong>الألعاب والبطاقات</strong><small>GAMES & DIGITAL CARDS</small></span><b>↗</b></div>
-          <div><span class="marketplace-index">02</span><span class="marketplace-glyph violet">S</span><span class="marketplace-label"><strong>المشاهدة والترفيه</strong><small>STREAMING & ENTERTAINMENT</small></span><b>↗</b></div>
-          <div><span class="marketplace-index">03</span><span class="marketplace-glyph mint">AI</span><span class="marketplace-label"><strong>الذكاء الاصطناعي</strong><small>AI & SMART TOOLS</small></span><b>↗</b></div>
-          <div><span class="marketplace-index">04</span><span class="marketplace-glyph">P</span><span class="marketplace-label"><strong>الإنتاجية والبرامج</strong><small>PRODUCTIVITY & SOFTWARE</small></span><b>↗</b></div>
-          <div><span class="marketplace-index">05</span><span class="marketplace-glyph violet">L</span><span class="marketplace-label"><strong>التعلّم والمعرفة</strong><small>LEARNING & KNOWLEDGE</small></span><b>↗</b></div>
-        </div>
       </div>"""
 if "marketplace-board" not in html:
     html, count = re.subn(
@@ -50,8 +43,8 @@ if "marketplace-board" not in html:
 html = re.sub(r'<style>\.kix-instagram-footer\{[\s\S]*?</style>', '', html, count=1)
 html = re.sub(r'<style>\.kix-social-footer\{[\s\S]*?</style>', '', html, count=1)
 
-css_tag = '<link rel="stylesheet" href="kix-marketplace-refinement.css?v=20261127-2">'
+css_tag = '<link rel="stylesheet" href="kix-marketplace-refinement.css?v=20261127-3">'
 if "kix-marketplace-refinement.css" not in html:
     html = re.sub(r'</head\s*>', css_tag + "\n</head>", html, count=1, flags=re.I)
 index.write_text(html, encoding="utf-8")
-print("Marketplace refinement installed: category-led hero, broader messaging, and shared footer styling.")
+print("Marketplace refinement installed: clean mascot hero, broader messaging, and shared footer styling.")
