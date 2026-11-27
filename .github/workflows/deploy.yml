@@ -21,6 +21,8 @@ jobs:
         run: python security/test_brand_refresh.py
       - name: Test marketplace refinement patch
         run: python security/test_marketplace_refinement.py
+      - name: Test product sorting regression
+        run: python security/test_product_sorting.py
       - name: Check project archive
         id: archive
         run: |
