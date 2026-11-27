@@ -15,7 +15,7 @@ drop policy if exists "staff read own assignment" on public.store_staff;
 create policy "staff read own assignment" on public.store_staff for select to authenticated using(user_id=(select auth.uid()) or public.is_owner());
 
 create or replace function public.has_staff_permission(p_permission text)
-returns boolean language sql stable security definer set search_path=public as $$
+returns boolean language sql stable set search_path=public as $
  select public.is_owner() or exists(select 1 from public.store_staff s where s.user_id=(select auth.uid()) and s.active and coalesce((s.permissions->>p_permission)::boolean,false));
 $$;
 revoke all on function public.has_staff_permission(text) from public;
