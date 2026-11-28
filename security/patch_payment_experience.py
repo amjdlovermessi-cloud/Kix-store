@@ -2,6 +2,12 @@ from pathlib import Path
 import sys
 
 site = Path(sys.argv[1]).resolve()
+root = Path(__file__).resolve().parent.parent
+for name in ('kix-payment-experience.js', 'kix-payment-experience.css'):
+    source = root / name
+    if not source.is_file():
+        raise SystemExit(f'KIX payment patch: missing asset {source}')
+    (site / name).write_bytes(source.read_bytes())
 index = site / 'index.html'
 store = site / 'store.js'
 if not index.is_file() or not store.is_file():
