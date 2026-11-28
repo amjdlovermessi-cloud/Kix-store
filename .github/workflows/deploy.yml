@@ -54,6 +54,7 @@ jobs:
           python security/patch_marketplace_refinement.py site
           python security/patch_customer_suite.py site
           python security/patch_commerce_experience.py site
+          python security/patch_payment_experience.py site
           python security/patch_gallery_upload.py site
           python security/patch_staff_admin.py site
           python - <<'PY'
@@ -106,6 +107,10 @@ jobs:
         if: steps.archive.outputs.exists == 'true'
         run: |
           node --check site/kix-commerce-enhancements.js
+          node --check site/kix-payment-experience.js
+          grep -q 'receipt_data:f.get' site/store.js
+          grep -q 'data-payment-select="asiacell"' site/index.html
+          grep -q 'kix-method-card' site/payment.html
           test -f site/guarantee.html
           test -f site/payment.html
           test -f site/faq.html
