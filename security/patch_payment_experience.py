@@ -15,7 +15,7 @@ b += len('</dialog>')
 checkout = '''<dialog id="checkoutDialog" class="modal kix-checkout-modal"><form id="checkoutForm">
 <div class="modal-head"><div><span class="kix-checkout-kicker">KIX SECURE CHECKOUT</span><h2>إكمال الطلب</h2></div><button type="button" class="close-modal" data-close="checkoutDialog" aria-label="إغلاق">✕</button></div>
 <div class="kix-checkout-steps"><span class="is-active"><b>01</b> بياناتك</span><i></i><span class="is-active"><b>02</b> الدفع</span><i></i><span><b>03</b> تأكيد الطلب</span></div>
-<section class="kix-checkout-section"><div class="kix-section-heading"><b>01</b><div><strong>معلومات التواصل</strong><small>حتى نكدر نتابع طلبك ونسلّمك المنتج</small></div></div>
+<div aria-hidden="true" style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden"><label>اترك هذا الحقل فارغاً<input name="website" type="text" tabindex="-1" autocomplete="off"></label></div>\n<section class="kix-checkout-section"><div class="kix-section-heading"><b>01</b><div><strong>معلومات التواصل</strong><small>حتى نكدر نتابع طلبك ونسلّمك المنتج</small></div></div>
 <div class="form-grid"><label>الاسم الكامل<input name="customer_name" required maxlength="100" placeholder="اكتب اسمك"></label><label>رقم الهاتف<input name="phone" required maxlength="30" inputmode="tel" placeholder="07xxxxxxxxx"></label><label class="wide">البريد الإلكتروني <small>(اختياري)</small><input name="email" type="email" placeholder="name@example.com"></label><label class="wide">ملاحظات الطلب <small>(اختياري)</small><textarea name="notes" rows="2" placeholder="أي تفاصيل إضافية عن طلبك..."></textarea></label></div></section>
 <section class="kix-checkout-section"><div class="kix-section-heading"><b>02</b><div><strong>اختَر طريقة الدفع</strong><small>وسائل الدفع المتاحة حالياً</small></div></div>
 <div class="kix-payment-options">
@@ -38,8 +38,8 @@ if 'kix-payment-experience.js' not in html:
 index.write_text(html, encoding='utf-8')
 js_path = site / 'store.js'
 js = js_path.read_text(encoding='utf-8')
-old = "payment_method:f.get('payment_method'),items"
-new = "payment_method:f.get('payment_method'),receipt_mime:f.get('receipt_mime'),receipt_data:f.get('receipt_data'),items"
+old = "payment_method:f.get('payment_method'),website:f.get('website'),items"
+new = "payment_method:f.get('payment_method'),website:f.get('website'),receipt_mime:f.get('receipt_mime'),receipt_data:f.get('receipt_data'),items"
 if new not in js:
     if old not in js:
         raise SystemExit('KIX payment patch: order payload insertion point not found')
