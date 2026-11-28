@@ -43,7 +43,7 @@ if '</footer>' in html and 'kix-footer-payment-methods' not in html:
     footer = """<div class="kix-footer-payment-methods" aria-label="طرق الدفع المتاحة"><span class="kix-footer-payment-title">طرق الدفع</span><span class="kix-footer-payment-item"><img class="kix-payment-brand asia" src="https://www.asiacell.com/assets/ac-logo.svg" alt="Asiacell"><b>آسياسيل</b></span><span class="kix-footer-payment-item"><img class="kix-payment-brand super" src="https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/9f/74/3c/9f743c5f-8bb4-f7f7-3f98-3c5b39135be5/AppIcon-0-0-1x_U007ephone-0-1-0-sRGB-85-220.png/1200x630wa.png" alt="SuperQi"><b>سوبر كي</b></span><span class="kix-footer-payment-item"><img class="kix-payment-brand dizly" src="https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/5e/47/e6/5e47e63c-58ca-244a-102c-1fbe1007e811/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/1200x630wa.png" alt="Dizly"><b>Dizly</b></span></div>"""
     html = html.replace('</footer>', footer + '</footer>', 1)
 if 'kix-payment-experience.js' not in html:
-    html = html.replace('<script src="store.js" defer></script>', '<script src="store.js" defer></script><link rel="stylesheet" href="kix-payment-experience.css?v=20261128-1"><script src="kix-payment-experience.js?v=20261128-1" defer></script>', 1)
+    html = html.replace('<script src="store.js" defer></script>', '<script src="store.js" defer></script><link rel="stylesheet" href="kix-payment-experience.css?v=20261128-2"><script src="kix-payment-experience.js?v=20261128-2" defer></script>', 1)
 index.write_text(html, encoding='utf-8')
 js_path = site / 'store.js'
 js = js_path.read_text(encoding='utf-8')
@@ -67,6 +67,6 @@ if payment.exists():
 <div class="kix-method-card"><span class="kix-payment-logo dizly">D</span><h2>Dizly</h2><p>وسيلة دفع للزبائن خارج العراق. استخدم معرّف الاستلام الظاهر بعد اختيارها.</p><small>للزبائن خارج العراق</small></div>
 </div><div class="kix-payment-note"><strong>مهم قبل التحويل</strong><p>أرسل الطلب أولاً، ثم حوّل المبلغ وأرفق صورة إثبات التحويل. تتم مراجعة الدفع يدوياً قبل تسليم المنتج.</p></div><a class="kix-policy-back" href="index.html#products">العودة للمتجر واختيار منتج</a></article>'''
         phtml = phtml[:start] + body + phtml[end + len('</article>'):]
-        phtml = phtml.replace('</head>', '<link rel="stylesheet" href="kix-payment-experience.css?v=20261128-1"></head>', 1)
+        phtml = phtml.replace('</head>', '<link rel="stylesheet" href="kix-payment-experience.css?v=20261128-2"></head>', 1)
         payment.write_text(phtml, encoding='utf-8')
 print('KIX payment experience installed.')
