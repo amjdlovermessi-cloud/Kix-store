@@ -39,6 +39,9 @@ checkout = '''<dialog id="checkoutDialog" class="modal kix-checkout-modal"><form
 html = html[:a] + checkout + html[b:]
 if 'href="payment.html"' not in html:
     html = html.replace('<footer class="footer">', '<section class="kix-payment-page-link"><a href="payment.html">تعرّف على طرق الدفع المتاحة <span>←</span></a></section><footer class="footer">', 1)
+if '</footer>' in html and 'kix-footer-payment-methods' not in html:
+    footer = """<div class="kix-footer-payment-methods" aria-label="طرق الدفع المتاحة"><span class="kix-footer-payment-title">طرق الدفع</span><span class="kix-footer-payment-item"><i class="kix-payment-logo asia">A</i><b>آسياسيل</b></span><span class="kix-footer-payment-item"><i class="kix-payment-logo super">Q</i><b>سوبر كي</b></span><span class="kix-footer-payment-item"><i class="kix-payment-logo dizly">D</i><b>Dizly</b></span></div>"""
+    html = html.replace('</footer>', footer + '</footer>', 1)
 if 'kix-payment-experience.js' not in html:
     html = html.replace('<script src="store.js" defer></script>', '<script src="store.js" defer></script><link rel="stylesheet" href="kix-payment-experience.css?v=20261128-1"><script src="kix-payment-experience.js?v=20261128-1" defer></script>', 1)
 index.write_text(html, encoding='utf-8')
